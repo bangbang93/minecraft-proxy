@@ -38,7 +38,7 @@ server.on('connection', function (client){
                 if (result.results['nextState'] == 1){
                     var server = config['servers'][result.results['serverHost']];
                     if (!server){
-                        client.close();
+                        client.end();
                     } else {
                         var host = server.host;
                         var port = server.port;

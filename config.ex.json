@@ -5,6 +5,10 @@
     "localhost": {
       "host": "localhost",
       "port": 25565
+    },
+    "127.0.0.1": {
+      "host": "localhost",
+      "port": 25565
     }
   }
 }
