@@ -1,0 +1,23 @@
+{
+  "name": "minecraft-proxy",
+  "version": "0.0.1",
+  "description": "ProxyPass minecraft",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bangbang93/minecraft-proxy"
+  },
+  "keywords": [
+    "minecraft",
+    "proxy"
+  ],
+  "author": "bangbang93",
+  "license": "GPL",
+  "bugs": {
+    "url": "https://github.com/bangbang93/minecraft-proxy/issues"
+  },
+  "homepage": "https://github.com/bangbang93/minecraft-proxy"
+}
