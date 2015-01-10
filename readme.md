@@ -1,5 +1,7 @@
 # Minecraft-Proxy
 相当于BungeeCord的精简版，完整支持Forge，暂不支持正版登录。若后端服务器是Spigot或者Cauldron，可以通过spigot.yml启用bungee模式来获取正确的客户端IP
+
+*暂不支持传送门*
 # config
     {
       "port": 25566,   //程序监听的端口
