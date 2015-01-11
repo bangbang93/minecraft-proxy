@@ -1,5 +1,5 @@
 {
-  "port": 25566,
+  "port": [25566],
   "host": "0.0.0.0",
   "servers":{
     "localhost": {

@@ -6,91 +6,27 @@ var crypto = require('crypto');
 var protocol = require('./protocol');
 
 var fs = require('fs');
-var config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
+var Config = JSON.parse(fs.readFileSync('Config.json', 'utf8'));
 
 var connections = {};
 
-var server = net.createServer();
+var servers = [];
 
-server.on('connection', function (client){
+if (!Array.isArray(Config.port)){
+    Config.port = [Config.port];
+}
 
-    var buffer = new Buffer(0);
-    var state = 'handshaking';
-    var handshake;
-    var uuid;
-    client.on('data', function (data){
-        buffer = Buffer.concat([buffer, data]);
-        while (true){
-            var result = protocol.parsePacket(buffer, state, true, {
-                set_protocol: 1,
-                ping_start: 1,
-                login_start: 1
-            });
-            if (!result){
-                break;
-            }
-            if (result.error){
-                break;
-            }
-            console.log(state);
-            if (state == 'handshaking'){
-                if (result.results['nextState'] == 1){
-                    var server = config['servers'][result.results['serverHost']];
-                    if (!server){
-                        client.end();
-                    } else {
-                        var host = server.host;
-                        var port = server.port;
-                        var mc = net.connect({
-                            host: host,
-                            port: port
-                        });
-                        (function (mc, buffer){
-                            mc.on('connect', function (){
-                                mc.write(buffer);
-                                client.removeAllListeners('data');
-                                makePipe(client, mc);
-                            })
-                        })(mc, buffer);
-                    }
-                } else {
-                    handshake = result.results;
-                    state = 'login';
-                }
-            } else if (state = 'login'){
-                server = config['servers'][handshake['serverHost']];
-                if (!server){
-                    client.write(protocol.createPacketBuffer(0x00, 'login', {
-                        reason: '服务器不存在'
-                    }, true));
-                } else {
-                    host = server.host;
-                    port = server.port;
-                    mc = net.connect({
-                        host: host,
-                        port: port
-                    });
-                    (function (mc, result){
-                        mc.on('connect', function (){
-                            var packet = result.results;
-                            var usernameMD5 = md5(packet['username']);
-                            uuid = usernameMD5.substr(0,8) + '-' + usernameMD5.substr(8,4) + '-' + usernameMD5.substr(12,4) + '-' + usernameMD5.substr(16,4) + '-' + usernameMD5.substr(20,12);
-                            handshake['uuid'] = uuid;
-                            handshake['serverHost'] += '\0' + client.remoteAddress + '\0' + uuid;
-                            var handshakePacket = protocol.createPacketBuffer(0x00, 'handshaking', handshake, false);
-                            var loginPacket = protocol.createPacketBuffer(0x00, 'login', packet, false);
-                            var newBuffer = Buffer.concat([handshakePacket, loginPacket]);
-                            mc.write(newBuffer);
-                            client.removeAllListeners('data');
-                            makePipe(client, mc);
-                        })
-                    })(mc, result);
-                }
 
-            }
-            buffer = buffer.slice(result.size);
-        }
+Config.port.forEach(function (e){
+    var server = net.createServer();
+    server.on('connection', function(conn){
+        onConnection(server, conn);
     });
+    server.listen(e, Config.host);
+    server.on('listening', function (){
+        console.log('proxy is ready on ' + Config.host + ':' + e);
+    });
+    servers.push(server);
 });
 
 function makePipe(client, server, handshake, login, serverInfo){
@@ -125,25 +61,103 @@ function removeConnection(uuid){
     delete connections[uuid];
 }
 
-server.listen(config.port, config.host);
+function onConnection(server, client){
+    var buffer = new Buffer(0);
+    var state = 'handshaking';
+    var handshake;
+    var uuid;
+    client.on('data', function (data){
+        buffer = Buffer.concat([buffer, data]);
+        while (true){
+            var result = protocol.parsePacket(buffer, state, true, {
+                set_protocol: 1,
+                ping_start: 1,
+                login_start: 1
+            });
+            if (!result){
+                break;
+            }
+            if (result.error){
+                break;
+            }
+            console.log(state);
+            if (state == 'handshaking'){
+                if (result.results['nextState'] == 1){
+                    var server = getServer(result.results['serverHost'], result.results['serverPort']);
+                    if (!server){
+                        client.end();
+                    } else {
+                        var host = server.host;
+                        var port = server.port;
+                        var mc = net.connect({
+                            host: host,
+                            port: port
+                        });
+                        (function (mc, buffer){
+                            mc.on('connect', function (){
+                                mc.write(buffer);
+                                client.removeAllListeners('data');
+                                makePipe(client, mc);
+                            })
+                        })(mc, buffer);
+                    }
+                } else {
+                    handshake = result.results;
+                    state = 'login';
+                }
+            } else if (state = 'login'){
+                server = getServer(handshake['serverHost'], handshake['serverPort']);
+                if (!server){
+                    client.write(protocol.createPacketBuffer(0x00, 'login', {
+                        reason: '服务器不存在'
+                    }, true));
+                } else {
+                    host = server.host;
+                    port = server.port;
+                    mc = net.connect({
+                        host: host,
+                        port: port
+                    });
+                    (function (mc, result){
+                        mc.on('connect', function (){
+                            var packet = result.results;
+                            var usernameMD5 = md5(packet['username']);
+                            uuid = usernameMD5.substr(0,8) + '-' + usernameMD5.substr(8,4) + '-' + usernameMD5.substr(12,4) + '-' + usernameMD5.substr(16,4) + '-' + usernameMD5.substr(20,12);
+                            handshake['uuid'] = uuid;
+                            handshake['serverHost'] += '\0' + client.remoteAddress + '\0' + uuid;
+                            var handshakePacket = protocol.createPacketBuffer(0x00, 'handshaking', handshake, false);
+                            var loginPacket = protocol.createPacketBuffer(0x00, 'login', packet, false);
+                            var newBuffer = Buffer.concat([handshakePacket, loginPacket]);
+                            mc.write(newBuffer);
+                            client.removeAllListeners('data');
+                            makePipe(client, mc);
+                        })
+                    })(mc, result);
+                }
 
-server.on('listening', function (){
-    console.log('proxy is ready on ' + config.host + ':' + config.port);
-});
+            }
+            buffer = buffer.slice(result.size);
+        }
+    });
+}
+
+function getServer(serverName, serverPort){
+    return Config['servers'][serverName] || Config['servers'][serverPort];
+}
 
 process.stdin.resume();
 process.stdin.on('data', function (data){
     data = data.toString().split(' ');
     switch(data[0].toLowerCase().trim()){
         case 'reload':
-            fs.readFile('config.json', 'utf8', function (err, data){
+            fs.readFile('Config.json', 'utf8', function (err, data){
                 if (err){
                     console.error(err);
                 } else {
                     try{
-                        config = JSON.parse(data);
+                        Config = JSON.parse(data);
                         console.log('重载配置成功');
-                        console.log(config);
+                        console.log(Config);
                     }catch(e){
                         console.trace(e);
                     }
