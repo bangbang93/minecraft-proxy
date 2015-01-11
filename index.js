@@ -126,3 +126,24 @@ function removeConnection(uuid){
 }
 
 server.listen(config.port, config.host);
+
+process.stdin.resume();
+process.stdin.on('data', function (data){
+    data = data.toString().split(' ');
+    switch(data[0].toLowerCase().trim()){
+        case 'reload':
+            fs.readFile('config.json', 'utf8', function (err, data){
+                if (err){
+                    console.error(err);
+                } else {
+                    try{
+                        config = JSON.parse(data);
+                        console.log('重载配置成功');
+                        console.log(config);
+                    }catch(e){
+                        console.error(e);
+                    }
+                }
+            })
+    }
+});
