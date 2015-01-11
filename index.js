@@ -90,12 +90,7 @@ function onConnection(client) {
                     if (!server){
                         client.end();
                     } else {
-                        var host = server.host;
-                        var port = server.port;
-                        var mc = net.connect({
-                            host: host,
-                            port: port
-                        });
+                        var mc = net.connect(server);
                         (function (mc, buffer){
                             mc.on('connect', function (){
                                 mc.write(buffer);
@@ -115,12 +110,7 @@ function onConnection(client) {
                         reason: '服务器不存在'
                     }, true));
                 } else {
-                    host = server.host;
-                    port = server.port;
-                    mc = net.connect({
-                        host: host,
-                        port: port
-                    });
+                    mc = net.connect(server);
                     (function (mc, result, server){
                         mc.on('connect', function (){
                             var packet = result.results;
