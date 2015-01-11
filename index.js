@@ -127,6 +127,10 @@ function removeConnection(uuid){
 
 server.listen(config.port, config.host);
 
+server.on('listening', function (){
+    console.log('proxy is ready on ' + config.host + ':' + config.port);
+});
+
 process.stdin.resume();
 process.stdin.on('data', function (data){
     data = data.toString().split(' ');
@@ -141,9 +145,13 @@ process.stdin.on('data', function (data){
                         console.log('重载配置成功');
                         console.log(config);
                     }catch(e){
-                        console.error(e);
+                        console.trace(e);
                     }
                 }
             })
     }
+});
+
+process.on('uncaughtException', function (err){
+    console.trace(err);
 });
