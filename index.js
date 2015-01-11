@@ -116,7 +116,7 @@ function onConnection(client) {
                         host: host,
                         port: port
                     });
-                    (function (mc, result){
+                    (function (mc, result, server){
                         mc.on('connect', function (){
                             var packet = result.results;
                             var usernameMD5 = md5(packet['username']);
@@ -128,9 +128,9 @@ function onConnection(client) {
                             var newBuffer = Buffer.concat([handshakePacket, loginPacket]);
                             mc.write(newBuffer);
                             client.removeAllListeners('data');
-                            makePipe(client, mc);
+                            makePipe(client, mc, handshake, loginPacket, server);
                         })
-                    })(mc, result);
+                    })(mc, result, server);
                 }
 
             }
