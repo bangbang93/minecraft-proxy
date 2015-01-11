@@ -154,7 +154,7 @@ process.stdin.on('data', function (data){
     data = data.toString().split(' ');
     switch(data[0].toLowerCase().trim()){
         case 'reload':
-            fs.readFile('Config.json', 'utf8', function (err, data){
+            fs.readFile('config.json', 'utf8', function (err, data){
                 if (err){
                     console.error(err);
                 } else {
