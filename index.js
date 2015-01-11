@@ -104,7 +104,7 @@ function makePipe(client, server, handshake, login, serverInfo){
             connections['uuid'][i] = handshake[i];
         }
         client.on('end', (function(uuid){
-            return function(uuid){
+            return function(){
                 removeConnection(uuid)
             };
         })(handshake['uuid']));
