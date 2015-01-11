@@ -140,7 +140,7 @@ function onConnection(client) {
 }
 
 function getServer(serverName, serverPort){
-    return Config['servers'][serverName] + ':' + Config['servers'][serverPort] ||
+    return (Config['servers'][serverName] + ':' + Config['servers'][serverPort]) ||
         Config['servers'][serverName] ||
         Config['servers'][serverPort] ||
         Config['servers'][Config['default']];
