@@ -32,7 +32,6 @@ server.on('connection', function (client){
             if (result.error){
                 break;
             }
-            console.log(result);
             console.log(state);
             if (state == 'handshaking'){
                 if (result.results['nextState'] == 1){
@@ -93,10 +92,14 @@ server.on('connection', function (client){
     });
 });
 
-function makePipe(client, server){
+function makePipe(client, server, handshake, login, serverInfo){
     client.pipe(server).pipe(client);
     console.log('add connection');
-    console.log('local port' + client.remotePort);
+    if (handshake){
+        console.log('piping ' + login['username'] + '[' + client.remoteAddress + ':' + client.remotePort + '] to ' + handshake['serverHost'] + '[' + serverInfo['host'] + ':' + serverInfo['port'] + ']');
+    } else {
+        console.log(client.remoteAddress + 'for pinging');
+    }
 }
 
 function md5 (str) {
