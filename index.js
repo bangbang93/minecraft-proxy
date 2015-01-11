@@ -92,6 +92,9 @@ function onConnection(client) {
                     } else {
                         var mc = net.connect(server);
                         (function (mc, buffer){
+                            mc.on('error', function (err){
+                                mcError(mc, err);
+                            });
                             mc.on('connect', function (){
                                 mc.write(buffer);
                                 client.removeAllListeners('data');
@@ -112,6 +115,9 @@ function onConnection(client) {
                 } else {
                     mc = net.connect(server);
                     (function (mc, result, server){
+                        mc.on('error', function (err){
+                            mcError(mc, err);
+                        });
                         mc.on('connect', function (){
                             var packet = result.results;
                             var usernameMD5 = md5(packet['username']);
@@ -137,6 +143,11 @@ function onConnection(client) {
 
 function onError(port, err){
     console.error("Server on port " + port + " couldn't work property" );
+    console.trace(err);
+}
+
+function mcError(server, err){
+    console.error("Couldn't connect to " + server.host + ':' + server.port);
     console.trace(err);
 }
 
