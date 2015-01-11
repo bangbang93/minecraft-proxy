@@ -75,6 +75,7 @@ server.on('connection', function (client){
                             var packet = result.results;
                             var usernameMD5 = md5(packet['username']);
                             uuid = usernameMD5.substr(0,8) + '-' + usernameMD5.substr(8,4) + '-' + usernameMD5.substr(12,4) + '-' + usernameMD5.substr(16,4) + '-' + usernameMD5.substr(20,12);
+                            handshake['uuid'] = uuid;
                             handshake['serverHost'] += '\0' + client.remoteAddress + '\0' + uuid;
                             var handshakePacket = protocol.createPacketBuffer(0x00, 'handshaking', handshake, false);
                             var loginPacket = protocol.createPacketBuffer(0x00, 'login', packet, false);
@@ -96,6 +97,17 @@ function makePipe(client, server, handshake, login, serverInfo){
     client.pipe(server).pipe(client);
     console.log('add connection');
     if (handshake){
+        connections['uuid'] = {
+            socket: client
+        };
+        for(var i in handshake){
+            connections['uuid'][i] = handshake[i];
+        }
+        client.on('end', (function(uuid){
+            return function(uuid){
+                removeConnection(uuid)
+            };
+        })(handshake['uuid']));
         console.log('piping ' + login['username'] + '[' + client.remoteAddress + ':' + client.remotePort + '] to ' + handshake['serverHost'] + '[' + serverInfo['host'] + ':' + serverInfo['port'] + ']');
     } else {
         console.log(client.remoteAddress + 'for pinging');
@@ -107,6 +119,10 @@ function md5 (str) {
     md5sum.update(str);
     str = md5sum.digest('hex');
     return str;
+}
+
+function removeConnection(uuid){
+    delete connections[uuid];
 }
 
 server.listen(config.port, config.host);
