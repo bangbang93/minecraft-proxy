@@ -24,6 +24,9 @@ Config.port.forEach(function (e){
     server.on('listening', function (){
         console.log('proxy is ready on ' + Config.host + ':' + e);
     });
+    server.on('error', function (err){
+        onError(e, err);
+    });
     servers.push(server);
 });
 
@@ -140,6 +143,11 @@ function onConnection(client) {
             buffer = buffer.slice(result.size);
         }
     });
+}
+
+function onError(port, err){
+    console.error("Server on port " + port + " couldn't work property" );
+    console.trace(err);
 }
 
 function getServer(serverName, serverPort){
