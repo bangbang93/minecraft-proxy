@@ -19,9 +19,7 @@ if (!Array.isArray(Config.port)){
 
 Config.port.forEach(function (e){
     var server = net.createServer();
-    server.on('connection', function(conn){
-        onConnection(server, conn);
-    });
+    server.on('connection', onConnection);
     server.listen(e, Config.host);
     server.on('listening', function (){
         console.log('proxy is ready on ' + Config.host + ':' + e);
@@ -61,7 +59,7 @@ function removeConnection(uuid){
     delete connections[uuid];
 }
 
-function onConnection(server, client){
+function onConnection(client) {
     var buffer = new Buffer(0);
     var state = 'handshaking';
     var handshake;
@@ -145,7 +143,7 @@ function getServer(serverName, serverPort){
     return Config['servers'][serverName] + ':' + Config['servers'][serverPort] ||
         Config['servers'][serverName] ||
         Config['servers'][serverPort] ||
-        Config['servers']['default'];
+        Config['servers'][Config['default']];
 }
 
 process.stdin.resume();
