@@ -152,7 +152,7 @@ function mcError(server, err){
 }
 
 function getServer(serverName, serverPort){
-    return (Config['servers'][serverName+ ':' + serverPort]) ||
+    return Config['servers'][serverName + ':' + serverPort] ||
         Config['servers'][serverName] ||
         Config['servers'][serverPort] ||
         Config['servers'][Config['default']];
