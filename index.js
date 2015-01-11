@@ -6,7 +6,7 @@ var crypto = require('crypto');
 var protocol = require('./protocol');
 
 var fs = require('fs');
-var Config = JSON.parse(fs.readFileSync('Config.json', 'utf8'));
+var Config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
 
 var connections = {};
 
