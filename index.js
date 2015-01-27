@@ -9,6 +9,7 @@ var fs = require('fs');
 var Config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
 
 var connections = {};
+var ips = {};
 
 var servers = [];
 
@@ -65,6 +66,14 @@ function removeConnection(uuid){
 }
 
 function onConnection(client) {
+    ips[client.remoteAddress] = ips[client.remoteAddress] ++ ||1;
+    if (!checkGlobalIp(client.remoteAddress)){
+        client.write(protocol.createPacketBuffer(0x00, 'handshake', {
+            reason: '超过IP连接上限'
+        }, true));
+        client.end();
+        return;
+    }
     var buffer = new Buffer(0);
     var state = 'handshaking';
     var handshake;
@@ -139,11 +148,18 @@ function onConnection(client) {
             buffer = buffer.slice(result.size);
         }
     });
+    client.on('close', function (){
+        onClose(client);
+    })
 }
 
 function onError(port, err){
     console.error("Server on port " + port + " couldn't work property" );
     console.trace(err);
+}
+
+function onClose(client){
+    ips[client.remoteAddress] --;
 }
 
 function mcError(server, err){
@@ -156,6 +172,15 @@ function getServer(serverName, serverPort){
         Config['servers'][serverName] ||
         Config['servers'][serverPort] ||
         Config['servers'][Config['default']];
+}
+
+function checkGlobalIp(ip){
+    var ipLimit = Config['ipLimit'][ip]||Config['ipLimit']['default'];
+    if (ipLimit == -1){
+        return true;
+    }
+    var nowIp = ips[ip] || 0;
+    return nowIp < ipLimit;
 }
 
 process.stdin.resume();
