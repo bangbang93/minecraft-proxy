@@ -169,7 +169,7 @@ function getServer(serverName, serverPort){
 }
 
 function checkGlobalIp(ip){
-    var ipLimit = Config['ipLimit'][ip]||Config['ipLimit']['default'];
+    var ipLimit = Config['ipLimit'][ip]||Config['ipLimit']['default'] || -1;
     if (ipLimit == -1){
         return true;
     }
