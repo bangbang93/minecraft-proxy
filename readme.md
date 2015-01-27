@@ -5,23 +5,17 @@
 # 配置 config.js
 初次启动前需要复制config.ex.js重命名为config.js
 
-    {
-      "port": 25566,   //程序监听的端口
-      "host": "0.0.0.0",  //程序监听的IP
-      "servers":{  //服务器们
-        "localhost": {    //连接的服务器的域名，如example.com，可设置多个服务器，每个服务器只能有一个域名
-          "host": "localhost",   //真正的minecraft服务器地址
-          "port": 25565          //及其端口
-        }
-      }
-    }
-
-# 监听多个端口
+# 配置文件说明
 
     {
       "port": [25566, 25567, 25568],   //程序监听的端口，可以监听任意多个端口
       "host": "0.0.0.0",  //程序监听的IP，暂不支持监听多个，0.0.0.0代表所有入口ip
       "default": "localhost",
+      "ipLimit": {    //IP并发限制
+        "default": 0,   //默认限制，-1代表不限制
+        "127.0.0.1": 0
+      },
+      "ban": {"ip": []},  //封禁ip
       "servers":{  //服务器们
         "25566": {    //连接的服务器的端口，即上面的端口
           "host": "localhost",   //真正的minecraft服务器地址
@@ -51,7 +45,24 @@
 若上述三步均未找到服务器，则查找default字段指定的服务器，若default字段指定的服务器不存在，则会断开和客户端的连接
 
 # 命令
-reload 重载。重载只能重载服务器列表
+- reload
+
+```reload```
+
+重载：
+重载不会导致程序重新监听端口
+
+- banip
+
+```banip <ip>```
+
+封禁ip，后跟一个有效ip。不会将封禁ip已有连接断开
+
+- limitip
+
+```limitip <ip> <limit>```
+
+限制单ip并发，不会断开已经超过的连接
 
 # Referer
 protocol.js引用自[node-minecraft-protocol](https://github.com/andrewrk/node-minecraft-protocol/blob/master/lib/protocol.js)
