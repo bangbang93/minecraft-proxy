@@ -1,13 +1,28 @@
 {
-  "port": [25566],
+  "port": [25566, 25567, 25568],
   "host": "0.0.0.0",
   "default": "localhost",
+  "ipLimit":{
+    "default": -1,
+    "127.0.0.1": -1
+  },
+  "ban":{
+    "ip":[]
+  },
   "servers":{
-    "localhost": {
+    "25566": {
       "host": "localhost",
       "port": 25565
     },
-    "127.0.0.1": {
+    "25567": {
+      "host": "localhost",
+      "port": 25565
+    },
+    "localhost:25568": {
+      "host": "localhost",
+      "port": 25565
+    },
+    "localhost2:25568": {
       "host": "localhost",
       "port": 25565
     }

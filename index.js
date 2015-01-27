@@ -2,11 +2,13 @@
  * Created by bangbang on 15/01/10.
  */
 var net = require('net');
-var crypto = require('crypto');
 var protocol = require('./protocol');
+var fun = require('./function');
+var command = require('./command');
 
 var fs = require('fs');
-var Config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
+
+global.Config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
 
 var connections = {};
 var ips = {};
@@ -54,24 +56,20 @@ function makePipe(client, server, handshake, login, serverInfo){
     }
 }
 
-function md5 (str) {
-    var md5sum = crypto.createHash('md5');
-    md5sum.update(str);
-    str = md5sum.digest('hex');
-    return str;
-}
-
 function removeConnection(uuid){
     delete connections[uuid];
 }
 
 function onConnection(client) {
+    if (checkBanIp){
+        if (!checkGlobalIp(client.remoteAddress)){
+            fun.close(client, 'ip被封禁');
+            return;
+        }
+    }
     ips[client.remoteAddress] = ips[client.remoteAddress] ++ ||1;
     if (!checkGlobalIp(client.remoteAddress)){
-        client.write(protocol.createPacketBuffer(0x00, 'handshake', {
-            reason: '超过IP连接上限'
-        }, true));
-        client.end();
+        fun.close(client, '超过ip上限');
         return;
     }
     var buffer = new Buffer(0);
@@ -129,7 +127,7 @@ function onConnection(client) {
                         });
                         mc.on('connect', function (){
                             var packet = result.results;
-                            var usernameMD5 = md5(packet['username']);
+                            var usernameMD5 = fun.md5(packet['username']);
                             uuid = usernameMD5.substr(0,8) + '-' + usernameMD5.substr(8,4) + '-' + usernameMD5.substr(12,4) + '-' + usernameMD5.substr(16,4) + '-' + usernameMD5.substr(20,12);
                             handshake['uuid'] = uuid;
                             handshake['originHost'] = handshake['serverHost'];
@@ -183,26 +181,11 @@ function checkGlobalIp(ip){
     return nowIp < ipLimit;
 }
 
-process.stdin.resume();
-process.stdin.on('data', function (data){
-    data = data.toString().split(' ');
-    switch(data[0].toLowerCase().trim()){
-        case 'reload':
-            fs.readFile('config.json', 'utf8', function (err, data){
-                if (err){
-                    console.error(err);
-                } else {
-                    try{
-                        Config = JSON.parse(data);
-                        console.log('重载配置成功');
-                        console.log(Config);
-                    }catch(e){
-                        console.trace(e);
-                    }
-                }
-            })
-    }
-});
+function checkBanIp(ip){
+    return global.Config['ban']['ip'].indexOf(ip) !== -1;
+
+}
+
 
 process.on('uncaughtException', function (err){
     console.trace(err);
