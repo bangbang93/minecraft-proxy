@@ -183,6 +183,6 @@ function checkBanIp(ip){
 }
 
 
-//process.on('uncaughtException', function (err){
-//    console.trace(err);
-//});
+process.on('uncaughtException', function (err){
+    console.trace(err);
+});
