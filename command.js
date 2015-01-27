@@ -16,7 +16,7 @@ process.stdin.on('data', function (data){
                     try{
                         global.Config = JSON.parse(data);
                         console.log('重载配置成功');
-                        console.log(Config);
+                        console.log(global.Config);
                     }catch(e){
                         console.trace(e);
                     }
@@ -25,7 +25,7 @@ process.stdin.on('data', function (data){
             break;
         case 'banip':
             var ip = data[1];
-            if (net.isIP(ip) !== 0){
+            if (net.isIP(ip) === 0){
                 console.log('please input a ip');
                 break;
             } else {
@@ -39,11 +39,11 @@ process.stdin.on('data', function (data){
         case 'limitip':
             ip = data[1].trim();
             var limit = data[2];
-            if (!ip){
+            if (net.isIP(ip) === 0){
                 console.log('please input a ip');
                 break;
             }
-            if (!limit || isNaN(parseInt(limit))){
+            if (!limit || isNaN(limit = parseInt(limit))){
                 console.log('please input a limit number');
                 break;
             }

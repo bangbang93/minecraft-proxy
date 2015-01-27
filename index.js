@@ -4,7 +4,7 @@
 var net = require('net');
 var protocol = require('./protocol');
 var fun = require('./function');
-var command = require('./command');
+require('./command');
 
 var fs = require('fs');
 
@@ -61,15 +61,13 @@ function removeConnection(uuid){
 }
 
 function onConnection(client) {
-    if (checkBanIp){
-        if (!checkGlobalIp(client.remoteAddress)){
-            fun.close(client, 'ip被封禁');
-            return;
-        }
+    if (checkBanIp(client.remoteAddress)){
+        fun.close(client, 'ip被封禁');
+        return;
     }
     ips[client.remoteAddress] = ips[client.remoteAddress] ++ ||1;
     if (!checkGlobalIp(client.remoteAddress)){
-        fun.close(client, '超过ip上限');
+        fun.close(client, '超过单IP并发限制');
         return;
     }
     var buffer = new Buffer(0);
@@ -116,14 +114,12 @@ function onConnection(client) {
             } else if (state = 'login'){
                 server = getServer(handshake['serverHost'], handshake['serverPort']);
                 if (!server){
-                    client.write(protocol.createPacketBuffer(0x00, 'login', {
-                        reason: '服务器不存在'
-                    }, true));
+                    fun.close(client, '服务器不存在');
                 } else {
                     mc = net.connect(server);
                     (function (mc, result, server){
                         mc.on('error', function (err){
-                            mcError(mc, err);
+                            mcError(server, err);
                         });
                         mc.on('connect', function (){
                             var packet = result.results;
@@ -187,6 +183,6 @@ function checkBanIp(ip){
 }
 
 
-process.on('uncaughtException', function (err){
-    console.trace(err);
-});
+//process.on('uncaughtException', function (err){
+//    console.trace(err);
+//});

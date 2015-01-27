@@ -13,8 +13,9 @@ exports.md5 = function md5 (str) {
 };
 
 exports.close = function (client, reaseon){
-    client.write(protocol.createPacketBuffer(0x00, 'handshake', {
+    client.write(protocol.createPacketBuffer(0x00, 'login', {
         reason: reaseon
     }, true));
     client.end();
+    console.log('[' + client.remoteAddress + ':' + client.remotePort + '] close because ' + reaseon);
 };
