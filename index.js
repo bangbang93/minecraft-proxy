@@ -135,8 +135,7 @@ function checkBanIp(ip){
 
 }
 
-
-//process.on('uncaughtException', function (err){
-//    console.dir(err);
-//    console.log(JSON.stringify(err));
-//});
+process.on('uncaughtException', function (err){
+    console.dir(err);
+    console.log(JSON.stringify(err));
+});
