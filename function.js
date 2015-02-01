@@ -109,7 +109,7 @@ var status = exports.status = function status(serverInfo, client){
     }
 };
 
-var handshake = exports.handshake = function (result, client, buffer){
+exports.handshake = function (result, client, buffer){
     if (result.results['nextState'] == 1){
         var server = getServer(result.results['serverHost'], result.results['serverPort']);
         if (!server){

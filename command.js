@@ -4,6 +4,8 @@
 var fs = require('fs');
 var net = require('net');
 
+var fun = require('./function');
+
 process.stdin.resume();
 process.stdin.on('data', function (data){
     data = data.toString().split(' ');
@@ -52,9 +54,20 @@ process.stdin.on('data', function (data){
             break;
         case 'list':
             var connections = global.connections;
+            var output = {};
             for (var i in connections){
-                console.log()
+                var server = connections[i];
+                var serverInfo = fun.getServer(i);
+                output[i] = {};
+                output[i]['player'] = (connections[i].count||0) + '/' + ((serverInfo['handlePing'] || {})['maxPlayers'] || 'N/A');
+                output[i]['list'] = [];
+                for (var j in server){
+                    if (j != 'count'){
+                        output[i]['list'].push(server[j]['username']);
+                    }
+                }
             }
+            console.log(output);
     }
 });
 
