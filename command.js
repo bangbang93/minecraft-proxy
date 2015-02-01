@@ -50,6 +50,11 @@ process.stdin.on('data', function (data){
             global.Config['ipLimit'][ip] = limit;
             writeConfig();
             break;
+        case 'list':
+            var connections = global.connections;
+            for (var i in connections){
+                console.log()
+            }
     }
 });
 

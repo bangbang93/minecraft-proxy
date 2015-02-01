@@ -47,7 +47,8 @@ var makePipe = exports.makePipe = function makePipe(client, server, handshake, l
         var connectPool = global.connections[serverInfo.host + ':' + (serverInfo.port||25565)];
         connectPool.count = connectPool.count +1 || 1;
         var newConnection = connectPool[handshake.uuid] = {
-            socket: client
+            socket: client,
+            username: login['username']
         };
 
         for(var i in handshake){
