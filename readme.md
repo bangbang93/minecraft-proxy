@@ -19,7 +19,13 @@
       "servers":{  //服务器们
         "25566": {    //连接的服务器的端口，即上面的端口
           "host": "localhost",   //真正的minecraft服务器地址
-          "port": 25565          //及其端口
+          "port": 25565,          //及其端口
+          "handlePing": {     //使用proxy处理ping请求，如不需要则删除该项或者设为false
+            "version": "1.7.10",   //服务版本
+            "maxPlayers": 93,     //玩家上限
+            "description": "minecraft-proxy",    //motd
+            "favicon": "path/to/file.png"       //图片
+          }
         },
         "25567": {    //连接的服务器的端口
           "host": "localhost",   //真正的minecraft服务器地址

@@ -14,7 +14,13 @@
   "servers": {
     "25566": {
       "host": "localhost",
-      "port": 25565
+      "port": 25565,
+      "handlePing": {
+        "version": "1.7.10",
+        "maxPlayers": 93,
+        "description": "minecraft-proxy",
+        "favicon": "path/to/file.png"
+      }
     },
     "25567": {
       "host": "localhost",

@@ -71,7 +71,7 @@ function onConnection(client) {
                     state = res.state;
                 }
             } else if (state == 'status') {
-                fun.ping(client, result);
+                fun.ping(client, result, handshake);
             } else if (state = 'login'){
                     var server = getServer(handshake['serverHost'], handshake['serverPort']);
                     if (!server){
