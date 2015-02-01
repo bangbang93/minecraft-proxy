@@ -70,5 +70,11 @@
 
 限制单ip并发，不会断开已经超过的连接
 
+- list
+
+```list```
+
+显示服务器连接情况
+
 # Referer
 protocol.js引用自[node-minecraft-protocol](https://github.com/andrewrk/node-minecraft-protocol/blob/master/lib/protocol.js)
