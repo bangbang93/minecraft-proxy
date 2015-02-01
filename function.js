@@ -83,22 +83,24 @@ var status = exports.status = function status(serverInfo, client){
             'text': serverInfo['handlePing']['description']
         }
     };
-    fs.exists(serverInfo['handlePing']['favicon'], function (exists){
-        if (exists){
-            fs.readFile(serverInfo['handlePing']['favicon'], {encoding: null}, function (err, data){
-                if (!err){
-                    response.favicon = 'data:image/png;base64,' + data.toString('base64');
-                }
+    if (serverInfo['handlePing']['favicon']){
+        fs.exists(serverInfo['handlePing']['favicon'], function (exists){
+            if (exists){
+                fs.readFile(serverInfo['handlePing']['favicon'], {encoding: null}, function (err, data){
+                    if (!err){
+                        response.favicon = 'data:image/png;base64,' + data.toString('base64');
+                    }
+                    client.write(protocol.createPacketBuffer(0x00, 'status', {
+                        response: JSON.stringify(response)
+                    }, true));
+                })
+            } else {
                 client.write(protocol.createPacketBuffer(0x00, 'status', {
                     response: JSON.stringify(response)
                 }, true));
-            })
-        } else {
-            client.write(protocol.createPacketBuffer(0x00, 'status', {
-                response: JSON.stringify(response)
-            }, true));
-        }
-    })
+            }
+        })
+    }
 };
 
 var handshake = exports.handshake = function (result, client, buffer){
