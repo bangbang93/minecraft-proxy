@@ -100,6 +100,10 @@ var status = exports.status = function status(serverInfo, client){
                 }, true));
             }
         })
+    } else {
+        client.write(protocol.createPacketBuffer(0x00, 'status', {
+            response: JSON.stringify(response)
+        }, true));
     }
 };
 
