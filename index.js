@@ -10,7 +10,7 @@ var fs = require('fs');
 
 global.Config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
 
-var connections = global.connections = {};
+global.connections = {};
 var ips = global.ips = {};
 
 var servers = [];
