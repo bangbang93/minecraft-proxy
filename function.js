@@ -60,6 +60,12 @@ var makePipe = exports.makePipe = function makePipe(client, server, handshake, l
                 connectPool.count --;
             };
         })(handshake['uuid']));
+        client.on('error', (function(uuid){
+            return function(){
+                removeConnection(serverInfo.host + ':' + (serverInfo.port||25565), uuid);
+                connectPool.count --;
+            };
+        })(handshake['uuid']));
         console.log('piping ' + login['username'] + '(' + handshake['uuid'] + ')' +
         '[' + client.remoteAddress + ':' + client.remotePort + '] to '
         + handshake['originHost'] + '[' + serverInfo['host'] + ':' + serverInfo['port'] + ']');

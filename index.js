@@ -81,7 +81,7 @@ function onConnection(client) {
                         (function (mc, result, server){
                             mc.on('error', function (err){
                                 fun.close(client, err.toString());
-                                mcError(mc, err);
+                                mcError(server, err);
                             });
                             mc.on('connect', function (){
                                 var packet = result.results;
