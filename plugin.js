@@ -6,14 +6,14 @@ var path = require('path');
 
 module.exports = function (Proxy){
     if (fs.existsSync(path.join(__dirname, 'plugins'))){
-        readPlugin(Proxy);
+        loadPlugin(Proxy);
     } else {
         fs.mkdir(path.join(__dirname, 'plugins'));
     }
 };
 
 
-function readPlugin(Proxy){
+function loadPlugin(Proxy){
     var files = fs.readdirSync(path.join(__dirname, 'plugins'));
     files.forEach(function (e){
         if (e.match(/\.js$/i)){
