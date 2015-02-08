@@ -21,9 +21,9 @@ function loadPlugin(Proxy){
         if (e.match(/\.js$/i)){
             var plugin = require(path.join(path.join(__dirname, 'plugins'), e));
             if (typeof plugin == 'function'){
-                plugins.push(plugin);
                 plugin(Proxy);
             }
+            plugins.push(plugin);
         }
     })
 }
