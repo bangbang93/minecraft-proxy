@@ -4,6 +4,8 @@
 var fs = require('fs');
 var path = require('path');
 
+var plugins = [];
+
 module.exports = function (Proxy){
     if (fs.existsSync(path.join(__dirname, 'plugins'))){
         loadPlugin(Proxy);
@@ -20,6 +22,7 @@ function loadPlugin(Proxy){
             var plugin = require(path.join(path.join(__dirname, 'plugins'), e));
             if (typeof plugin == 'function'){
                 plugin = plugin(Proxy);
+                plugins.push(plugin);
             }
         }
     })
