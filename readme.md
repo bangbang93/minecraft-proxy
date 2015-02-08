@@ -90,7 +90,16 @@ list
 
 
 # 插件
-全局变量global.Proxy是一个EventEmitter，拥有以下事件
+
+一个插件最基础的部分应该类似于
+```javascript
+module.exports = function (Proxy){  //Proxy是一个EventEmitter
+    console.log('测试插件加载成功');
+};
+```
+本程序将会加载plugins目录下的所有js文件作为自身的插件，不包括子目录
+
+## Proxy对象拥有以下事件
 
 - ready
 
