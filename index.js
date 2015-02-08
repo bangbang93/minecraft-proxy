@@ -2,8 +2,12 @@
  * Created by bangbang on 15/01/10.
  */
 var net = require('net');
+var events = require('events');
+var util = require('util');
+var EventEmitter = events.EventEmitter;
 var protocol = require('./protocol');
 var fun = require('./function');
+
 require('./command');
 
 var fs = require('fs');
@@ -15,10 +19,32 @@ var ips = global.ips = {};
 
 var servers = [];
 
+var Proxy = module.exports = function(){
+    this.getConnections = function(){
+        return global.connections;
+    };
+    this.getConfig = function(){
+        return global.Config;
+    };
+    this.getProtocol = function (){
+        return protocol;
+    };
+    this.getFun = function (){
+        return fun;
+    };
+    this.getServers = function(){
+        return servers;
+    }
+};
+util.inherits(module.exports, EventEmitter);
+
+var proxy = global.Proxy = new Proxy;
+
+require('./plugin')(proxy);
+
 if (!Array.isArray(Config.port)){
     Config.port = [Config.port];
 }
-
 
 Config.port.forEach(function (e){
     var server = net.createServer();
@@ -26,6 +52,7 @@ Config.port.forEach(function (e){
     server.listen(e, Config.host);
     server.on('listening', function (){
         console.log('proxy is ready on ' + Config.host + ':' + e);
+        proxy.emit('ready', server);
     });
     server.on('error', function (err){
         onError(e, err);
@@ -45,6 +72,7 @@ function onConnection(client) {
         fun.close(client, '超过单IP并发限制');
         return;
     }
+    proxy.emit('connection', client);
     var state = 'handshaking';
     var handshake;
     var uuid;
@@ -65,25 +93,30 @@ function onConnection(client) {
             }
             console.log(state);
             if (state == 'handshaking'){
+                proxy.emit('handshaking', client, result);
                 var res = fun.handshake(result, client, buffer);
                 if (!!res){
                     handshake = res.handshake;
                     state = res.state;
                 }
             } else if (state == 'status') {
+                proxy.emit('status', client, result, handshake);
                 fun.ping(client, result, handshake);
             } else if (state = 'login'){
                     var server = getServer(handshake['serverHost'], handshake['serverPort']);
                     if (!server){
                         fun.close(client, '服务器不存在');
                     } else {
+                        proxy.emit('login', client, server, result, handshake);
                         var mc = net.connect(server);
                         (function (mc, result, server){
                             mc.on('error', function (err){
+                                proxy.emit('backEndError', client, server, err);
                                 fun.close(client, err.toString());
                                 mcError(server, err);
                             });
                             mc.on('connect', function (){
+                                proxy.emit('backEndConnect', client, server, mc);
                                 var packet = result.results;
                                 var usernameMD5 = fun.md5(packet['username']);
                                 uuid = usernameMD5.substr(0,8) + '-' + usernameMD5.substr(8,4) + '-' + usernameMD5.substr(12,4) + '-' + usernameMD5.substr(16,4) + '-' + usernameMD5.substr(20,12);
@@ -104,6 +137,7 @@ function onConnection(client) {
             }
     });
     client.on('close', function (){
+        proxy.emit('close', client);
         onClose(client);
     })
 }

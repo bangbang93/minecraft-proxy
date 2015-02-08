@@ -80,5 +80,41 @@
 
 显示服务器连接情况
 
+
+# 插件
+全局变量global.Proxy是一个EventEmitter，拥有以下事件
+
+- ready
+
+当proxy就绪后触发该事件，每个端口触发一次，每次都会传递一个server对象
+
+- connection
+
+当有连接连入，并且没有被封禁或者超过ip数量限制时触发，传递一个连接对象
+
+- handshaking
+
+当有连接进入握手状态时触发，传递一个连接对象，和一个握手包内容
+
+- status
+
+当有连接进入状态查询状态时触发，传递一个连接对象，及其状态查询参数和相应的握手参数
+
+- login
+
+当有连接进入登录状态时触发，传递一个连接对象，连接的服务端信息，连接数据包信息及握手参数
+
+- backEndError
+
+连接后端mc服务器错误时触发，传递一个连接对象、服务器信息和错误信息
+
+- backEndConnect
+
+连接到后端服务器成功时触发，传递一个客户端连接对象，服务器信息和服务器连接对象
+
+- close
+
+客户端关闭连接时触发，传递一个连接对象
+
 # Referer
 protocol.js引用自[node-minecraft-protocol](https://github.com/andrewrk/node-minecraft-protocol/blob/master/lib/protocol.js)
