@@ -152,6 +152,10 @@ exports.handshake = function (result, client, buffer){
 
 var ping = exports.ping = function ping(client, result, handshake){
     var serverInfo = getServer(handshake['serverHost'], handshake['serverPort']);
+    if (!serverInfo){
+        close(client, '服务器不存在');
+        return;
+    }
     if (serverInfo['handlePing']){
         if (result.results.id == 0) return;
         client.write(protocol.createPacketBuffer(0x01, 'status',{
