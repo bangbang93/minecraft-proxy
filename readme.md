@@ -57,26 +57,34 @@
 # 命令
 - reload
 
-```reload```
+```
+reload
+```
 
 重载：
 重载不会导致程序重新监听端口
 
 - banip
 
-```banip <ip>```
+```
+banip <ip>
+```
 
 封禁ip，后跟一个有效ip。不会将封禁ip已有连接断开
 
 - limitip
 
-```limitip <ip> <limit>```
+```
+limitip <ip> <limit>
+```
 
 限制单ip并发，不会断开已经超过的连接
 
 - list
 
-```list```
+```
+list
+```
 
 显示服务器连接情况
 
