@@ -130,6 +130,7 @@ function onConnection(client) {
                                 mc.write(newBuffer);
                                 client.removeAllListeners('data');
                                 makePipe(client, mc, handshake, packet, server);
+                                state = 'play';
                             })
                         })(mc, result, server);
                     }
