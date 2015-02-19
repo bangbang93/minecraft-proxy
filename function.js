@@ -161,6 +161,6 @@ var ping = exports.ping = function ping(client, result, handshake){
         client.write(protocol.createPacketBuffer(0x01, 'status',{
             time: result.results.time
         }, true));
-        client.end();
+        client.destroy();
     }
 };
