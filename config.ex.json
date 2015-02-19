@@ -11,6 +11,7 @@
     "127.0.0.1": 0
   },
   "ban": {"ip": []},
+  "detective": false,
   "servers": {
     "25566": {
       "host": "localhost",

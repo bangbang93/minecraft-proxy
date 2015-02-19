@@ -92,7 +92,9 @@ function onConnection(client) {
                 break;
             }
             console.log(state);
-            console.log(result);
+            if (Config['detective']){
+                console.log(result);
+            }
             if (state == 'handshaking'){
                 proxy.emit('handshaking', client, result);
                 var res = fun.handshake(result, client, buffer);
