@@ -132,7 +132,7 @@ exports.handshake = function (result, client, buffer){
                     });
                     mc.on('connect', function (){
                         mc.write(buffer);
-                        client.removeAllListeners('data');
+                        //client.removeAllListeners('data');
                         makePipe(client, mc);
                     })
                 })(mc, buffer);
