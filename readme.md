@@ -1,4 +1,6 @@
 # Minecraft-Proxy 
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/bangbang93/minecraft-proxy.svg)](https://greenkeeper.io/)
 [![npm](https://nodei.co/npm/minecraft-proxy.png?downloads=true&downloadRank=true)](https://nodei.co/npm/minecraft-proxy)
 
 [![tnpm](http://npm.taobao.org/badge/v/minecraft-proxy.svg?style=flat-square)](http://npm.taobao.org/package/minecraft-proxy)
