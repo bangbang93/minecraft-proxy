@@ -1,3 +1,4 @@
+import {createLogger} from 'bunyan'
 import {createDeserializer, createSerializer, states, States} from 'minecraft-protocol'
 import * as framing from 'minecraft-protocol/src/transforms/framing'
 import {connect, Socket} from 'net'
@@ -15,6 +16,7 @@ export class Client {
   private framer: Duplex = framing.createFramer()
   private deserializer
   private serializer
+  private logger = createLogger({name: 'client'})
 
   private buffer: Buffer[] = []
 
@@ -100,6 +102,9 @@ export class Client {
         this.socket.pipe(socket)
         socket.pipe(this.socket)
         resolve()
+      })
+      socket.on('error', (err) => {
+        this.logger.error({err})
       })
     })
   }
