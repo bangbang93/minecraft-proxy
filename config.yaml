@@ -1,9 +1,0 @@
-proxy:
-  port: 25565
-  host: 0.0.0.0
-servers:
-  - serverName: localhost
-    proxyHost: localhost
-    proxyPort: 25566
-    version: 1.8.7
-    handlePing: true

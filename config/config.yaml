@@ -1,0 +1,17 @@
+proxy:
+  port: 25566
+  host: 0.0.0.0
+servers:
+  - serverName: localhost
+    proxyHost: localhost
+    proxyPort: 25565
+    version: 1.8.7
+    handlePing: true
+    isDefault: true
+  - serverName: 192.168.193.7
+    proxyHost: 192.168.193.1
+    proxyPort: 25565
+    version: 1.8.7
+    handlePing: true
+    isDefault: false
+

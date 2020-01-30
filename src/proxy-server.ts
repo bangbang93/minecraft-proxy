@@ -8,6 +8,7 @@ interface IBackend {
   port: number
   version: string
   handlePing: boolean
+  isDefault: boolean
 }
 
 export class ProxyServer extends EventEmitter {
@@ -16,7 +17,7 @@ export class ProxyServer extends EventEmitter {
   private server: Server
   private logger: Logger
 
-  public backends: Map<string, IBackend> = new Map()
+  private backends: Map<string, IBackend> = new Map()
 
   constructor(
     private port: number,
@@ -26,7 +27,7 @@ export class ProxyServer extends EventEmitter {
     this.logger = Logger.createLogger({name: 'server', port, host})
   }
 
-  async listen(): Promise<void> {
+  public async listen(): Promise<void> {
     if (this.server) throw new Error('already listen')
     const server = this.server = createServer()
     await new Promise((resolve) => {
@@ -34,6 +35,18 @@ export class ProxyServer extends EventEmitter {
     })
     server.on('connection', async (socket) => this.onConnection(socket))
     this.logger.info('ready')
+  }
+
+  public addBackend(name: string, backend: IBackend): void {
+    this.backends.set(name, backend)
+  }
+
+  public getBackend(name: string): IBackend {
+    if (this.backends.has(name)) return this.backends.get(name)
+    for (const value of this.backends.values()) {
+      if (value.isDefault) return value
+    }
+    return null
   }
 
   private async onConnection(socket: Socket): Promise<void> {
@@ -47,7 +60,7 @@ export class ProxyServer extends EventEmitter {
       this.logger.error({err})
     })
     const nextState = await client.awaitHandshake()
-    const backend = this.backends.get(client.host)
+    const backend = this.getBackend(client.host)
     if (!backend) return client.close(`${client.host} not found`)
     await client.pipeToBackend(backend.port, backend.host, backend.version, nextState)
     // if (nextState !== 1) {
