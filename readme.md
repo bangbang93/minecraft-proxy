@@ -1,4 +1,4 @@
-# Minecraft-Proxy 
+# Minecraft-ProxyServer 
 [![npm](https://nodei.co/npm/minecraft-proxy.png?downloads=true&downloadRank=true)](https://nodei.co/npm/minecraft-proxy)
 
 [![tnpm](http://npm.taobao.org/badge/v/minecraft-proxy.svg?style=flat-square)](http://npm.taobao.org/package/minecraft-proxy)
@@ -93,7 +93,7 @@ list
 
 一个插件最基础的部分应该类似于
 ```javascript
-module.exports = function (Proxy){  //Proxy是一个EventEmitter
+module.exports = function (ProxyServer){  //Proxy是一个EventEmitter
     console.log('测试插件加载成功');
 };
 ```
