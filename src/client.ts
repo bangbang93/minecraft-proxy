@@ -90,7 +90,8 @@ export class Client {
         const framer: Duplex = framing.createFramer()
         serializer.pipe(framer).pipe(socket)
         serializer.write({name: 'set_protocol', params: {
-          protocolVersion: this.protocolVersion, serverHost: host, serverPort: port, nextState,
+          protocolVersion: this.protocolVersion, serverHost: `${host}\0${this.socket.remoteAddress}\0`,
+          serverPort: port, nextState,
         }})
         if (this.username) {
           serializer = createSerializer(
