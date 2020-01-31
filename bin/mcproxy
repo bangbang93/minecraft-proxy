@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 require('reflect-metadata')
+require('source-map-support')
 const cluster = require('cluster')
 const {loadConfig} = require('../dist/config')
+const {masterOnClusterMessage} = require('../dist/cluster')
 const {createLogger} = require('bunyan')
 
 const workers = new Map()
@@ -36,6 +38,7 @@ function startWorker() {
       startWorker()
     }
   })
+  worker.on('message', (data) => masterOnClusterMessage(worker, data))
 }
 
 function setupWorker(workerId) {
@@ -46,8 +49,9 @@ function setupWorker(workerId) {
   })
 }
 
-function setupMaster(config) {
-  process.on('SIGHUP', () => {
+function setupMaster() {
+  process.on('SIGHUP', async () => {
+    const config = await loadConfig()
     Logger.info('got sighup, reloading')
     for (const worker of workers.values()) {
       worker.disconnect()

@@ -1,4 +1,5 @@
 import {createLogger} from 'bunyan'
+import {EventEmitter} from 'events'
 import {createDeserializer, createSerializer, states, States} from 'minecraft-protocol'
 import * as framing from 'minecraft-protocol/src/transforms/framing'
 import {connect, Socket} from 'net'
@@ -6,7 +7,7 @@ import {Duplex} from 'stream'
 import {Backend} from './backend'
 import {ProxyServer} from './proxy-server'
 
-export class Client {
+export class Client extends EventEmitter {
   public host: string
   public protocolVersion: number
   public version = '1.8'
@@ -46,6 +47,10 @@ export class Client {
     private socket: Socket,
     public proxy: ProxyServer,
   ) {
+    super()
+    this.socket.on('end', () => {
+      this.emit('end')
+    })
   }
 
   public async awaitHandshake(): Promise<number> {
@@ -87,6 +92,7 @@ export class Client {
     const socket = connect(backend.port, backend.host)
     return new Promise((resolve) => {
       socket.on('connect', () => {
+        backend.addClient(this)
         let serializer: Duplex = createSerializer(
           {state: states.HANDSHAKING, isServer: false, version: backend.version, customPackets: {}},
         )
@@ -114,6 +120,9 @@ export class Client {
         socket.pipe(this.socket)
         resolve()
       })
+      socket.on('close', () => {
+        backend.removeClient(this)
+      })
       socket.on('error', (err) => {
         this.logger.error({err})
       })
@@ -128,7 +137,7 @@ export class Client {
       },
       players: {
         max: backend.ping.maxPlayer,
-        online: 0,
+        online: await backend.getOnline(),
         sample: [],
       },
       description: {

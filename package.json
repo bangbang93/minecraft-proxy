@@ -21,8 +21,10 @@
   },
   "homepage": "https://github.com/bangbang93/minecraft-proxy",
   "devDependencies": {
+    "@types/bluebird": "^3.5.29",
     "@types/bunyan": "^1.8.6",
     "@types/js-yaml": "^3.12.2",
+    "@types/lodash": "^4.14.149",
     "@types/node": "^13.5.1",
     "@typescript-eslint/eslint-plugin": "^2.18.0",
     "@typescript-eslint/parser": "^2.18.0",
@@ -31,13 +33,16 @@
     "typescript": "^3.7.5"
   },
   "dependencies": {
+    "bluebird": "^3.7.2",
     "bunyan": "^1.8.12",
     "class-transformer": "^0.2.3",
     "class-validator": "^0.11.0",
     "js-yaml": "^3.13.1",
+    "lodash": "^4.17.15",
     "minecraft-data": "^2.41.0",
     "minecraft-protocol": "^1.10.0",
     "reflect-metadata": "^0.1.13",
+    "source-map-support": "^0.5.16",
     "typedi": "^0.8.0"
   }
 }

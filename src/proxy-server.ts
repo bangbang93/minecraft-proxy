@@ -32,6 +32,9 @@ export class ProxyServer extends EventEmitter {
   }
 
   public addBackend(name: string, backend: IBackend): void {
+    if (this.backends.has(name)) {
+      throw new Error(`duplicate name ${name}`)
+    }
     this.backends.set(name, new Backend(backend))
   }
 
