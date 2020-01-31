@@ -161,6 +161,7 @@ export class Client extends EventEmitter {
         const packet = this.deserializer.parsePacketBuffer(chunk)
         const {name, params} = packet.data
         if (name === 'ping') {
+          this.splitter.removeAllListeners('data')
           this.write(name, params)
           resolve()
         }
