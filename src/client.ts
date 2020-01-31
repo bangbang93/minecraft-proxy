@@ -3,6 +3,7 @@ import {createDeserializer, createSerializer, states, States} from 'minecraft-pr
 import * as framing from 'minecraft-protocol/src/transforms/framing'
 import {connect, Socket} from 'net'
 import {Duplex} from 'stream'
+import {Backend} from './backend'
 import {ProxyServer} from './proxy-server'
 
 export class Client {
@@ -62,6 +63,7 @@ export class Client {
             switch (params.nextState) {
               case 1:
                 this.state = states.STATUS
+                this.splitter.removeAllListeners('data')
                 return resolve(params.nextState)
               case 2:
                 this.state = states.LOGIN
@@ -72,6 +74,7 @@ export class Client {
             break
           case 'login_start':
             this.username = params.username
+            this.splitter.removeAllListeners('data')
             return resolve(2)
           // no default
         }
@@ -79,30 +82,30 @@ export class Client {
     })
   }
 
-  public async pipeToBackend(port: number, host: string, version: string, nextState: number): Promise<Socket> {
+  public async pipeToBackend(backend: Backend, nextState: number): Promise<Socket> {
     this.socket.unpipe()
-    const socket = connect(port, host)
+    const socket = connect(backend.port, backend.host)
     return new Promise((resolve) => {
       socket.on('connect', () => {
         let serializer: Duplex = createSerializer(
-          {state: states.HANDSHAKING, isServer: false, version, customPackets: {}},
+          {state: states.HANDSHAKING, isServer: false, version: backend.version, customPackets: {}},
         )
         const framer: Duplex = framing.createFramer()
         serializer.pipe(framer).pipe(socket)
         serializer.write({name: 'set_protocol', params: {
-          protocolVersion: this.protocolVersion, serverHost: `${host}\0${this.socket.remoteAddress}\0`,
-          serverPort: port, nextState,
+          protocolVersion: this.protocolVersion, serverHost: `${backend.host}\0${this.socket.remoteAddress}\0`,
+          serverPort: backend.port, nextState,
         }})
         if (this.username) {
           serializer = createSerializer(
-            {state: states.LOGIN, isServer: false, version, customPackets: {}},
+            {state: states.LOGIN, isServer: false, version: backend.version, customPackets: {}},
           )
           serializer.pipe(framer)
           serializer.write({name: 'login_start', params: {username: this.username}})
         }
         if (nextState === 1) {
           serializer = createSerializer(
-            {state: states.STATUS, isServer: false, version, customPackets: {}},
+            {state: states.STATUS, isServer: false, version: backend.version, customPackets: {}},
           )
           serializer.pipe(framer)
           serializer.write({name: 'ping_start', params: {}})
@@ -113,6 +116,35 @@ export class Client {
       })
       socket.on('error', (err) => {
         this.logger.error({err})
+      })
+    })
+  }
+
+  public async responsePing(backend: Backend): Promise<void> {
+    const response = JSON.stringify({
+      version: {
+        name: backend.version,
+        protocol: backend.protocolVersion,
+      },
+      players: {
+        max: backend.ping.maxPlayer,
+        online: 0,
+        sample: [],
+      },
+      description: {
+        text: backend.ping.description,
+      },
+      favicon: backend.ping.favicon ? backend.ping.favicon : undefined,
+    })
+    this.write('server_info', {response})
+    return new Promise((resolve) => {
+      this.splitter.on('data', (chunk) => {
+        const packet = this.deserializer.parsePacketBuffer(chunk)
+        const {name, params} = packet.data
+        if (name === 'ping') {
+          this.write(name, params)
+          resolve()
+        }
       })
     })
   }

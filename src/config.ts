@@ -1,12 +1,14 @@
 import {plainToClass, Type} from 'class-transformer'
-import {IsBoolean, IsInt, IsOptional, IsPort, IsString, validate, ValidateNested} from 'class-validator'
+import {
+  IsBoolean, IsInstance, IsInt, IsOptional, IsPort, IsString, Max, Min, ValidateIf, ValidateNested, validateOrReject,
+} from 'class-validator'
 import {readFileSync} from 'fs'
 import * as yaml from 'js-yaml'
 import {cpus} from 'os'
 import {join} from 'path'
 
 class ConfigProxy {
-  @IsPort() public port: number
+  @Min(1) @Max(65535) public port: number
   @IsString() @IsOptional() public host?: string
 
   private _workers: number
@@ -24,13 +26,22 @@ class ConfigProxy {
   }
 }
 
+class ServerPingInfo {
+  @IsInt() @Min(1) public maxPlayer: number
+  @IsString() @IsOptional() public description?: string
+  @IsString() @IsOptional() public favicon?: string
+}
+
 class ConfigServer {
   @IsString() public serverName: string
   @IsString() public proxyHost: string
-  @IsPort() public proxyPort: number
+  @Min(1) @Max(65535)  public proxyPort: number
   @IsString() public version: string
   @IsBoolean() public handlePing: boolean
   @IsBoolean() public isDefault: boolean
+
+  @IsInstance(ServerPingInfo) @ValidateNested() @ValidateIf((e: ConfigServer) => e.handlePing)
+  public ping: ServerPingInfo
 }
 
 export class Config {
@@ -41,6 +52,6 @@ export class Config {
 export async function loadConfig(path = join(__dirname, '../config/config.yaml')): Promise<Config> {
   const data = yaml.load(readFileSync(path, 'utf8'))
   const config = plainToClass(Config, data, {enableImplicitConversion: true})
-  await validate(config)
+  await validateOrReject(config)
   return config
 }

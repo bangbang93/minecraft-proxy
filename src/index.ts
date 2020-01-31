@@ -13,7 +13,7 @@ async function bootstrap(): Promise<void> {
 
   for (const server of config.servers) {
     proxy.addBackend(server.serverName, {version: server.version, host: server.proxyHost, port: server.proxyPort,
-      handlePing: server.handlePing, isDefault: server.isDefault})
+      handlePing: server.handlePing, isDefault: server.isDefault, ping: server.ping})
   }
 
   await proxy.listen()

@@ -9,10 +9,19 @@ servers:
     version: 1.8.7
     handlePing: true
     isDefault: true
+    ping:
+      maxPlayer: 100
+      description: pupupu
+      favicon: null
+  - serverName: 127.0.0.1
+    proxyHost: localhost
+    proxyPort: 25565
+    version: 1.8.7
+    handlePing: false
+    isDefault: false
   - serverName: 192.168.193.7
     proxyHost: 192.168.193.1
     proxyPort: 25565
     version: 1.8.7
-    handlePing: true
+    handlePing: false
     isDefault: false
-

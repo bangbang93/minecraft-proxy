@@ -35,6 +35,7 @@
     "class-transformer": "^0.2.3",
     "class-validator": "^0.11.0",
     "js-yaml": "^3.13.1",
+    "minecraft-data": "^2.41.0",
     "minecraft-protocol": "^1.10.0",
     "reflect-metadata": "^0.1.13",
     "typedi": "^0.8.0"

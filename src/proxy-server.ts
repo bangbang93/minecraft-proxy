@@ -1,15 +1,9 @@
 import * as Logger from 'bunyan'
+import {plainToClass} from 'class-transformer'
 import {EventEmitter} from 'events'
 import {createServer, Server, Socket} from 'net'
+import {Backend, IBackend} from './backend'
 import {Client} from './client'
-
-interface IBackend {
-  host: string
-  port: number
-  version: string
-  handlePing: boolean
-  isDefault: boolean
-}
 
 export class ProxyServer extends EventEmitter {
   public clients: Set<Client> = new Set()
@@ -17,7 +11,7 @@ export class ProxyServer extends EventEmitter {
   private server: Server
   private logger: Logger
 
-  private backends: Map<string, IBackend> = new Map()
+  private backends: Map<string, Backend> = new Map()
 
   constructor(
     private port: number,
@@ -38,10 +32,10 @@ export class ProxyServer extends EventEmitter {
   }
 
   public addBackend(name: string, backend: IBackend): void {
-    this.backends.set(name, backend)
+    this.backends.set(name, new Backend(backend))
   }
 
-  public getBackend(name: string): IBackend {
+  public getBackend(name: string): Backend {
     if (this.backends.has(name)) return this.backends.get(name)
     for (const value of this.backends.values()) {
       if (value.isDefault) return value
@@ -62,30 +56,11 @@ export class ProxyServer extends EventEmitter {
     const nextState = await client.awaitHandshake()
     const backend = this.getBackend(client.host)
     if (!backend) return client.close(`${client.host} not found`)
-    await client.pipeToBackend(backend.port, backend.host, backend.version, nextState)
-    // if (nextState !== 1) {
-    //   await client.pipeToBackend(backend.port, backend.host, backend.version, nextState)
-    // } else {
-    //   client.write('server_info', {response: JSON.stringify({
-    //       "version": {
-    //         "name": "1.8.7",
-    //         "protocol": 5
-    //       },
-    //       "players": {
-    //         "max": 100,
-    //         "online": 5,
-    //         "sample": [
-    //           {
-    //             "name": "thinkofdeath",
-    //             "id": "4566e69f-c907-48ee-8d71-d7ba5aa00d20"
-    //           }
-    //         ]
-    //       },
-    //       "description": {
-    //         "text": "Hello world"
-    //       }
-    //     })})
-    // }
+    if (nextState === 2 || !backend.handlePing) {
+      await client.pipeToBackend(backend, nextState)
+    } else {
+      await client.responsePing(backend)
+    }
   }
 
   private onDisconnect(client: Client): void {
