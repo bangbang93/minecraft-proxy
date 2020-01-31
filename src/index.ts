@@ -12,8 +12,11 @@ async function bootstrap(): Promise<void> {
   Container.set('proxy', proxy)
 
   for (const server of config.servers) {
-    proxy.addBackend(server.serverName, {serverName: server.serverName, version: server.version, host: server.proxyHost,
-      port: server.proxyPort, handlePing: server.handlePing, isDefault: server.isDefault, ping: server.ping})
+    proxy.addBackend(server.serverName, {
+      ...server,
+      host: server.proxyHost,
+      port: server.proxyPort,
+    })
   }
 
   await proxy.listen()
