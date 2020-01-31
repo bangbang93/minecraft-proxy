@@ -14,4 +14,6 @@ WORKDIR /opt/minecraft-proxy
 COPY package-lock.json package.json ./
 COPY --from=BUILD /opt/minecraft-proxy/node_modules ./node_modules
 COPY --from=BUILD /opt/minecraft-proxy/dist ./dist
-CMD node dist/index
+COPY bin ./bin
+CMD node bin/mcproxy
+EXPOSE 25565

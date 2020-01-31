@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "target": "es2019",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "incremental": true
+  },
+  "include": [
+    "src/**/*",
+    "bin/*"
+  ],
+  "exclude": ["node_modules"]
+}

@@ -100,6 +100,13 @@ export class Client {
           serializer.pipe(framer)
           serializer.write({name: 'login_start', params: {username: this.username}})
         }
+        if (nextState === 1) {
+          serializer = createSerializer(
+            {state: states.STATUS, isServer: false, version, customPackets: {}},
+          )
+          serializer.pipe(framer)
+          serializer.write({name: 'ping_start', params: {}})
+        }
         this.socket.pipe(socket)
         socket.pipe(this.socket)
         resolve()

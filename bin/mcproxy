@@ -1,0 +1,67 @@
+#!/usr/bin/env node
+require('reflect-metadata')
+const cluster = require('cluster')
+const {loadConfig} = require('../dist/config')
+const {createLogger} = require('bunyan')
+
+const workers = new Map()
+
+const Logger = createLogger({name: cluster.isMaster ? 'master' : `worker ${cluster.worker.id}`})
+
+async function main() {
+  const config = await loadConfig()
+
+  if (cluster.isMaster) {
+    process.title = 'mc-proxy: master process'
+    for(let i = 0; i < config.proxy.workers; i++) {
+      startWorker()
+    }
+    setupMaster(config)
+    Logger.info('all workers started')
+  } else {
+    setupWorker(cluster.worker.id)
+    require('../dist/index')
+  }
+}
+
+function startWorker() {
+  const worker = cluster.fork()
+  workers.set(worker.id, worker)
+  worker.on('exit', (code, signal) => {
+    if (signal) {
+      Logger.warn({workerId: worker.id, signal}, `worker was killed by signal: ${signal}`)
+      startWorker()
+    } else if (code !== 0) {
+      Logger.warn({workerId: worker.id, code}, `worker exited with error code: ${code}`)
+      startWorker()
+    }
+  })
+}
+
+function setupWorker(workerId) {
+  process.title = `mc-proxy: worker ${workerId}`
+  process.on('disconnect', () => {
+    Logger.info('disconnect from master')
+    process.title = `mc-proxy: old worker ${workerId}`
+  })
+}
+
+function setupMaster(config) {
+  process.on('SIGHUP', () => {
+    Logger.info('got sighup, reloading')
+    for (const worker of workers.values()) {
+      worker.disconnect()
+    }
+    workers.clear()
+
+    for(let i = 0; i< config.proxy.workers; i++) {
+      startWorker()
+    }
+  })
+}
+
+main()
+  .catch((err) => {
+    console.error(err)
+    process.exit(1)
+  })

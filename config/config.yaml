@@ -1,6 +1,7 @@
 proxy:
   port: 25566
   host: 0.0.0.0
+  workers: 0
 servers:
   - serverName: localhost
     proxyHost: localhost
