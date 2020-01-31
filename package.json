@@ -15,7 +15,7 @@
     "proxy"
   ],
   "author": "bangbang93",
-  "license": "GPL",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/bangbang93/minecraft-proxy/issues"
   },
@@ -23,6 +23,7 @@
   "devDependencies": {
     "@types/bluebird": "^3.5.29",
     "@types/bunyan": "^1.8.6",
+    "@types/got": "^9.6.9",
     "@types/js-yaml": "^3.12.2",
     "@types/lodash": "^4.14.149",
     "@types/node": "^13.5.1",
@@ -37,6 +38,7 @@
     "bunyan": "^1.8.12",
     "class-transformer": "^0.2.3",
     "class-validator": "^0.11.0",
+    "got": "^10.4.0",
     "js-yaml": "^3.13.1",
     "lodash": "^4.17.15",
     "minecraft-data": "^2.41.0",

@@ -1,5 +1,7 @@
 import {createLogger} from 'bunyan'
+import {createHash} from 'crypto'
 import {EventEmitter} from 'events'
+import got from 'got'
 import {createDeserializer, createSerializer, states, States} from 'minecraft-protocol'
 import * as framing from 'minecraft-protocol/src/transforms/framing'
 import {connect, Socket} from 'net'
@@ -14,6 +16,7 @@ export class Client extends EventEmitter {
   public username: string
 
   private _state: States
+  private _uuid: string
   private splitter: Duplex = framing.createSplitter()
   private framer: Duplex = framing.createFramer()
   private deserializer
@@ -91,23 +94,30 @@ export class Client extends EventEmitter {
     this.socket.unpipe()
     const socket = connect(backend.port, backend.host)
     return new Promise((resolve) => {
-      socket.on('connect', () => {
+      socket.on('connect', async () => {
         backend.addClient(this)
         let serializer: Duplex = createSerializer(
           {state: states.HANDSHAKING, isServer: false, version: backend.version, customPackets: {}},
         )
         const framer: Duplex = framing.createFramer()
         serializer.pipe(framer).pipe(socket)
-        serializer.write({name: 'set_protocol', params: {
-          protocolVersion: this.protocolVersion, serverHost: `${backend.host}\0${this.socket.remoteAddress}\0`,
-          serverPort: backend.port, nextState,
-        }})
         if (this.username) {
+          serializer.write({name: 'set_protocol', params: {
+            protocolVersion: this.protocolVersion,
+            serverHost: `${backend.host}\0${this.socket.remoteAddress}\0${await this.getUUID(backend)}`,
+            serverPort: backend.port, nextState,
+          }})
           serializer = createSerializer(
             {state: states.LOGIN, isServer: false, version: backend.version, customPackets: {}},
           )
           serializer.pipe(framer)
           serializer.write({name: 'login_start', params: {username: this.username}})
+        } else {
+          serializer.write({name: 'set_protocol', params: {
+            protocolVersion: this.protocolVersion,
+            serverHost: `${backend.host}`,
+            serverPort: backend.port, nextState,
+          }})
         }
         if (nextState === 1) {
           serializer = createSerializer(
@@ -156,6 +166,24 @@ export class Client extends EventEmitter {
         }
       })
     })
+  }
+
+  public async getUUID(backend: Backend): Promise<string> {
+    if (this._uuid) return this._uuid
+    if (!backend.onlineMode) {
+      this._uuid = createHash('md5').update(this.username).digest('hex')
+    } else {
+      const resp = await got<{id: string; name: string}[]>(
+        'https://api.mojang.com/profiles/minecraft',
+        {responseType: 'json', body: JSON.stringify([this.username])},
+      )
+      if (resp.body.length > 0) {
+        this._uuid = resp.body[0].id
+      } else {
+        this.close('cannot get uuid for the user')
+      }
+    }
+    return this._uuid
   }
 
   public close(reason: string): void {

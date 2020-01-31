@@ -11,6 +11,7 @@ export interface IBackend {
   version: string
   handlePing: boolean
   isDefault: boolean
+  onlineMode: boolean
   ping: {
     maxPlayer: number
     description?: string
@@ -26,6 +27,7 @@ export class Backend implements IBackend {
   public readonly version: string
   public readonly handlePing: boolean
   public readonly isDefault: boolean
+  public readonly onlineMode: boolean
   public readonly ping: IBackend['ping']
 
   private clients = new Set<Client>()

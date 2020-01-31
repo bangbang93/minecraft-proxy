@@ -39,6 +39,7 @@ class ConfigServer {
   @IsString() public version: string
   @IsBoolean() public handlePing: boolean
   @IsBoolean() public isDefault: boolean
+  @IsBoolean() public onlineMode: boolean
 
   @IsInstance(ServerPingInfo) @ValidateNested() @ValidateIf((e: ConfigServer) => e.handlePing)
   public ping: ServerPingInfo
