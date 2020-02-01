@@ -9,6 +9,29 @@
 minecraft-proxy更像NGINX。
 BungeeCord的目标是把多个Minecraft实例用起来像一个，minecraft-proxy的目标是让多个Minecraft实例共享25565端口，就像http应用的虚拟主机。
 
+## 安装
+### 运行环境
+#### Windows/Linux/macOS
+请参阅各平台<https://nodejs.org/zh-cn/>的安装方法
+### 安装包
+- 去<https://github.com/bangbang93/minecraft-proxy/releases>下载一个版本
+- 解压
+    ```shell script
+    tar xvf minecraft-proxy.tar.gz
+    ```
+- 运行
+    ```shell script
+    bin/mcproxy
+    ```
+
+### 手动编译
+```shell script
+git clone git@github.com:bangbang93/minecraft-proxy.git
+cd minecraft-proxy
+npm ci
+npm run build
+```
+
 ## 配置 config.yml
 ```yaml
 proxy:
@@ -45,7 +68,7 @@ blockList:
 默认服务器： 当未找到对应的服务器主机名时，会连接默认服务器，若无默认服务器，则会断开连接
 
 ## 拆分配置文件
-参阅 </config/config.yml>
+参阅 [/config](/config)
 
 ## bungeecord模式
 找到spigot.yml，修改settings.bungeecord为true，重启服务器即可
