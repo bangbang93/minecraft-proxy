@@ -10,7 +10,6 @@ export interface IBackend {
   port: number
   version: string
   handlePing: boolean
-  isDefault: boolean
   onlineMode: boolean
   ping: {
     maxPlayer: number
@@ -26,7 +25,6 @@ export class Backend implements IBackend {
   public readonly port: number
   public readonly version: string
   public readonly handlePing: boolean
-  public readonly isDefault: boolean
   public readonly onlineMode: boolean
   public readonly ping: IBackend['ping']
 
@@ -40,7 +38,6 @@ export class Backend implements IBackend {
     this.port = data.port
     this.version = data.version
     this.handlePing = data.handlePing
-    this.isDefault = data.isDefault
     this.ping = data.ping
 
     const minecraftData = MinecraftData(this.version)

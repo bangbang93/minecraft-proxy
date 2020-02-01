@@ -6,6 +6,7 @@ import {ProxyServer} from './proxy-server'
 
 async function bootstrap(): Promise<void> {
   const config = await loadConfig()
+  Container.set('config', config)
 
   const proxy = new ProxyServer(config.proxy.port, config.proxy.host)
 
@@ -18,6 +19,7 @@ async function bootstrap(): Promise<void> {
       port: server.proxyPort,
     })
   }
+  proxy.defaultServer = config.defaultServer
 
   await proxy.listen()
 }

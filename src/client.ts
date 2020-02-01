@@ -23,8 +23,6 @@ export class Client extends EventEmitter {
   private serializer
   private logger = createLogger({name: 'client'})
 
-  private buffer: Buffer[] = []
-
   public get state(): States {
     return this._state
   }
@@ -61,7 +59,6 @@ export class Client extends EventEmitter {
     this.state = states.HANDSHAKING
     return new Promise<number>((resolve) => {
       this.splitter.on('data', (chunk) => {
-        this.buffer.push(chunk)
         const packet = this.deserializer.parsePacketBuffer(chunk)
         const {name, params} = packet.data
         switch (name) {

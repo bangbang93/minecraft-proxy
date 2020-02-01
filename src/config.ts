@@ -1,8 +1,10 @@
-import {plainToClass, Type} from 'class-transformer'
+import {plainToClass, Transform, Type} from 'class-transformer'
 import {
-  IsBoolean, IsInstance, IsInt, IsOptional, IsPort, IsString, Max, Min, ValidateIf, ValidateNested, validateOrReject,
+  IsBoolean, IsInstance, IsInt, IsOptional, IsPort, IsString, IsUUID, Max, Min, ValidateIf, ValidateNested,
+  validateOrReject,
 } from 'class-validator'
 import {readFileSync} from 'fs'
+import * as IPCIDR from 'ip-cidr'
 import * as yaml from 'js-yaml'
 import {cpus} from 'os'
 import {join} from 'path'
@@ -11,19 +13,8 @@ class ConfigProxy {
   @Min(1) @Max(65535) public port: number
   @IsString() @IsOptional() public host?: string
 
-  private _workers: number
-
-  public set workers(value: number) {
-    if (value === 0) {
-      this._workers = cpus().length
-    } else {
-      this._workers = value
-    }
-  }
-
-  public get workers(): number {
-    return this._workers
-  }
+  @IsInt() @Min(0) @Transform((v) => v === 0 ? cpus().length : v)
+  public workers: number
 }
 
 class ServerPingInfo {
@@ -38,19 +29,31 @@ class ConfigServer {
   @Min(1) @Max(65535)  public proxyPort: number
   @IsString() public version: string
   @IsBoolean() public handlePing: boolean
-  @IsBoolean() public isDefault: boolean
   @IsBoolean() public onlineMode: boolean
 
   @IsInstance(ServerPingInfo) @ValidateNested() @ValidateIf((e: ConfigServer) => e.handlePing)
   public ping: ServerPingInfo
 }
 
+class BlockList {
+  @IsInstance(IPCIDR, {each: true}) @Transform((v: string[]) => v.map((e) => new IPCIDR(e)))
+  public ips: IPCIDR[] = []
+
+  @IsString({each: true})
+  public usernames: string[] = []
+
+  @IsUUID(null, {each: true})
+  public uuid: string[] = []
+}
+
 export class Config {
   @ValidateNested() proxy: ConfigProxy
   @ValidateNested({each: true}) @Type(() => ConfigServer) servers: ConfigServer[]
+  @IsString() public defaultServer: string
+  @ValidateNested() public blockList: BlockList
 }
 
-export async function loadConfig(path = join(__dirname, '../config/config.yaml')): Promise<Config> {
+export async function loadConfig(path = join(__dirname, '../config/config.yml')): Promise<Config> {
   const data = yaml.load(readFileSync(path, 'utf8'))
   const config = plainToClass(Config, data, {enableImplicitConversion: true})
   await validateOrReject(config)

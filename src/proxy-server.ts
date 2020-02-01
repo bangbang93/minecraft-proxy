@@ -2,16 +2,20 @@ import * as Logger from 'bunyan'
 import {plainToClass} from 'class-transformer'
 import {EventEmitter} from 'events'
 import {createServer, Server, Socket} from 'net'
+import {Container} from 'typedi'
 import {Backend, IBackend} from './backend'
 import {Client} from './client'
+import {Config} from './config'
 
 export class ProxyServer extends EventEmitter {
   public clients: Set<Client> = new Set()
+  public defaultServer: string
 
   private server: Server
   private logger: Logger
 
   private backends: Map<string, Backend> = new Map()
+  private config: Config = Container.get('config')
 
   constructor(
     private port: number,
@@ -40,15 +44,15 @@ export class ProxyServer extends EventEmitter {
 
   public getBackend(name: string): Backend {
     if (this.backends.has(name)) return this.backends.get(name)
-    for (const value of this.backends.values()) {
-      if (value.isDefault) return value
-    }
+    if (this.backends.has(this.defaultServer)) return this.backends.get(defaultStatus)
     return null
   }
 
   private async onConnection(socket: Socket): Promise<void> {
     if (this.isIpBanned(socket.remoteAddress)) {
       socket.end()
+      this.logger.warn({ip: socket.remoteAddress}, `block ip ${socket.remoteAddress}`)
+      return
     }
     const client = new Client(socket, this)
     this.clients.add(client)
@@ -71,6 +75,6 @@ export class ProxyServer extends EventEmitter {
   }
 
   private isIpBanned(ip: string): boolean {
-    return false
+    return this.config.blockList.ips.some((cidr) => cidr.contains(ip))
   }
 }

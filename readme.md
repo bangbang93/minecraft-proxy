@@ -15,13 +15,14 @@ proxy:
   port: 25565 #监听端口
   host: 0.0.0.0 #监听ip
   workers: 0 #worker数量，以便充分利用多核服务器，0代表用上全部核心
+defaultServer: localhost #默认服务器，若不想指定，删除此行或设为false
 servers:
   - serverName: localhost #服务连接的主机名
     proxyHost: localhost # 后端服务实际ip
     proxyPort: 25565 #后端服务实际端口
     version: 1.8.7 #版本
     handlePing: true #是否接管ping响应
-    isDefault: true #是否为默认服务器，多个默认服务器以第一个为准
+    onlineMode: true
     ping: #接管ping时必填
       maxPlayer: 100 #最大玩家
       description: motd #motd
@@ -31,7 +32,6 @@ servers:
     proxyPort: 25565
     version: 1.8.7
     handlePing: true
-    isDefault: false
 ```
 
 默认服务器： 当未找到对应的服务器主机名时，会连接默认服务器，若无默认服务器，则会断开连接
