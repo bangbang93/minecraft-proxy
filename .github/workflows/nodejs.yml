@@ -20,10 +20,10 @@ jobs:
     - run: npm install
     - run: npm run build --if-present
     - run: tar cvf minecraft-proxy.tar bin/ config/ dist/ node_modules/ package.json package-lock.json readme.md
-      if: github.ref == 'refs/master'
+      if: github.ref == 'master'
     - name: Release
       uses: fnkr/github-action-ghr@v1
-      if: github.ref == 'refs/master'
+      if: github.ref == 'master'
       env:
         GHR_COMPRESS: xz
         GHR_PATH: build/
