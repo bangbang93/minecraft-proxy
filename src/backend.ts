@@ -38,6 +38,7 @@ export class Backend implements IBackend {
     this.port = data.port
     this.version = data.version
     this.handlePing = data.handlePing
+    this.onlineMode = data.onlineMode
     this.ping = data.ping
 
     const minecraftData = MinecraftData(this.version)

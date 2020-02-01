@@ -42,8 +42,8 @@ class BlockList {
   @IsString({each: true})
   public usernames: string[] = []
 
-  @IsUUID(null, {each: true})
-  public uuid: string[] = []
+  @IsString({each: true})
+  public uuids: string[] = []
 }
 
 export class Config {

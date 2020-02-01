@@ -32,6 +32,14 @@ servers:
     proxyPort: 25565
     version: 1.8.7
     handlePing: true
+blockList:
+  ips: #同时会阻拦掉ping请求
+    - 114.114.114.114
+    - 10.0.0.0/32
+  usernames:
+    - BadGays
+  uuids: # 只有开了正版验证的服务端可以封禁uuid，离线服务器只能用usernames
+    - 12b8b9e0eba0ca37e935f037ff1ae90d
 ```
 
 默认服务器： 当未找到对应的服务器主机名时，会连接默认服务器，若无默认服务器，则会断开连接

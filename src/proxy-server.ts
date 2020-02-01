@@ -1,5 +1,4 @@
 import * as Logger from 'bunyan'
-import {plainToClass} from 'class-transformer'
 import {EventEmitter} from 'events'
 import {createServer, Server, Socket} from 'net'
 import {Container} from 'typedi'
@@ -44,7 +43,7 @@ export class ProxyServer extends EventEmitter {
 
   public getBackend(name: string): Backend {
     if (this.backends.has(name)) return this.backends.get(name)
-    if (this.backends.has(this.defaultServer)) return this.backends.get(defaultStatus)
+    if (this.backends.has(this.defaultServer)) return this.backends.get(this.defaultServer)
     return null
   }
 
@@ -64,6 +63,17 @@ export class ProxyServer extends EventEmitter {
     const backend = this.getBackend(client.host)
     if (!backend) return client.close(`${client.host} not found`)
     if (nextState === 2 || !backend.handlePing) {
+      if (client.username && this.isUsernameBanned(client.username)) {
+        this.logger.warn({ip: socket.remoteAddress, username: client.username}, `block username ${client.username}`)
+        client.close('username banned')
+        return
+      }
+      if (backend.onlineMode && this.isUuidBanned(await client.getUUID(backend))) {
+        this.logger.warn({ip: socket.remoteAddress, username: client.username, uuid: await client.getUUID(backend)},
+          `block uuid ${await client.getUUID(backend)}`)
+        client.close('uuid banned')
+        return
+      }
       await client.pipeToBackend(backend, nextState)
     } else {
       await client.responsePing(backend)
@@ -76,5 +86,13 @@ export class ProxyServer extends EventEmitter {
 
   private isIpBanned(ip: string): boolean {
     return this.config.blockList.ips.some((cidr) => cidr.contains(ip))
+  }
+
+  private isUsernameBanned(username: string): boolean {
+    return this.config.blockList.usernames.includes(username)
+  }
+
+  private isUuidBanned(uuid: string): boolean {
+    return this.config.blockList.uuids.includes(uuid)
   }
 }

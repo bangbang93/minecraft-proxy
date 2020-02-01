@@ -5,7 +5,12 @@ proxy:
 defaultServer: localhost
 blockList:
   ips:
-    - 127.0.0.1/8
+    - 114.114.114.114
+    - 10.0.0.0/32
+  usernames:
+    - BadGays
+  uuids:
+    - 12b8b9e0eba0ca37e935f037ff1ae90d
 servers:
   - serverName: localhost
     proxyHost: localhost
@@ -17,12 +22,6 @@ servers:
       maxPlayer: 100
       description: pupupu
       favicon: null
-  - serverName: 127.0.0.1
-    proxyHost: localhost
-    proxyPort: 25565
-    version: 1.8.7
-    handlePing: false
-    onlineMode: false
   - serverName: 192.168.193.7
     proxyHost: 192.168.193.1
     proxyPort: 25565

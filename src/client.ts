@@ -173,7 +173,7 @@ export class Client extends EventEmitter {
     } else {
       const resp = await got<{id: string; name: string}[]>(
         'https://api.mojang.com/profiles/minecraft',
-        {responseType: 'json', body: JSON.stringify([this.username])},
+        {method: 'POST', responseType: 'json', body: JSON.stringify([this.username])},
       )
       if (resp.body.length > 0) {
         this._uuid = resp.body[0].id
@@ -185,7 +185,7 @@ export class Client extends EventEmitter {
   }
 
   public close(reason: string): void {
-    this.write('disconnect', {reason})
+    this.write('disconnect', {reason: JSON.stringify({text: reason})})
     // this.socket.end()
   }
 
