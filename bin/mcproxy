@@ -50,7 +50,7 @@ function setupWorker(workerId) {
 }
 
 function setupMaster() {
-  process.on('SIGHUP', async () => {
+  process.on('SIGUSR1', async () => {
     const config = await loadConfig()
     Logger.info('got sighup, reloading')
     for (const worker of workers.values()) {
