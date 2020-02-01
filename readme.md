@@ -3,7 +3,7 @@
 
 [![tnpm](http://npm.taobao.org/badge/v/minecraft-proxy.svg?style=flat-square)](http://npm.taobao.org/package/minecraft-proxy)
 
-反向代理Minecraft，完整支持Forge，支持正版登录。若后端服务器是Spigot或者Cauldron，可以通过spigot.yml启用bungee模式来获取正确的客户端IP
+反向代理Minecraft，完整支持Forge，支持正版登录。若后端服务器是Spigot或者Cauldron，可以通过spigot.yml启用bungeecord模式来获取正确的客户端IP
 
 ## 和BungeeCord的区别
 minecraft-proxy更像NGINX。
@@ -45,4 +45,7 @@ blockList:
 默认服务器： 当未找到对应的服务器主机名时，会连接默认服务器，若无默认服务器，则会断开连接
 
 ## 拆分配置文件
-参阅 <config/config.yml>
+参阅 </config/config.yml>
+
+## bungeecord模式
+找到spigot.yml，修改settings.bungeecord为true，重启服务器即可
