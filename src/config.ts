@@ -1,13 +1,11 @@
 import {plainToClass, Transform, Type} from 'class-transformer'
 import {
-  IsBoolean, IsInstance, IsInt, IsOptional, IsPort, IsString, IsUUID, Max, Min, ValidateIf, ValidateNested,
-  validateOrReject,
+  IsBoolean, IsInstance, IsInt, IsOptional, IsString, Max, Min, ValidateIf, ValidateNested, validateOrReject,
 } from 'class-validator'
-import {readFileSync} from 'fs'
 import * as IPCIDR from 'ip-cidr'
-import * as yaml from 'js-yaml'
 import {cpus} from 'os'
 import {join} from 'path'
+import * as yimp from 'yaml-import'
 
 class ConfigProxy {
   @Min(1) @Max(65535) public port: number
@@ -54,7 +52,7 @@ export class Config {
 }
 
 export async function loadConfig(path = join(__dirname, '../config/config.yml')): Promise<Config> {
-  const data = yaml.load(readFileSync(path, 'utf8'))
+  const data = yimp.read(path, {safe: false})
   const config = plainToClass(Config, data, {enableImplicitConversion: true})
   await validateOrReject(config)
   return config

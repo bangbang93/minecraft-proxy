@@ -1,0 +1,10 @@
+serverName: localhost
+proxyHost: localhost
+proxyPort: 25565
+version: 1.8.7
+handlePing: true
+onlineMode: true
+ping:
+  maxPlayer: 100
+  description: pupupu
+  favicon: null

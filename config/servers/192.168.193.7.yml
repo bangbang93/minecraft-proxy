@@ -1,0 +1,6 @@
+serverName: 192.168.193.7
+proxyHost: 192.168.193.1
+proxyPort: 25565
+version: 1.8.7
+handlePing: false
+onlineMode: false

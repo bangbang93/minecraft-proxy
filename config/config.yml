@@ -4,27 +4,11 @@ proxy:
   workers: 0
 defaultServer: localhost
 blockList:
-  ips:
-    - 114.114.114.114
-    - 10.0.0.0/32
+  ips: !!import/single block-ip.yml
   usernames:
     - BadGays
   uuids:
     - 12b8b9e0eba0ca37e935f037ff1ae90d
 servers:
-  - serverName: localhost
-    proxyHost: localhost
-    proxyPort: 25565
-    version: 1.8.7
-    handlePing: true
-    onlineMode: true
-    ping:
-      maxPlayer: 100
-      description: pupupu
-      favicon: null
-  - serverName: 192.168.193.7
-    proxyHost: 192.168.193.1
-    proxyPort: 25565
-    version: 1.8.7
-    handlePing: false
-    onlineMode: false
+  !!import/sequence
+  - servers/

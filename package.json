@@ -40,12 +40,12 @@
     "class-validator": "^0.11.0",
     "got": "^10.4.0",
     "ip-cidr": "^2.0.6",
-    "js-yaml": "^3.13.1",
     "lodash": "^4.17.15",
     "minecraft-data": "^2.41.0",
     "minecraft-protocol": "^1.10.0",
     "reflect-metadata": "^0.1.13",
     "source-map-support": "^0.5.16",
-    "typedi": "^0.8.0"
+    "typedi": "^0.8.0",
+    "yaml-import": "^2.0.0"
   }
 }
