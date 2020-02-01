@@ -19,12 +19,25 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm install
     - run: npm run build --if-present
-    - run: tar cf minecraft-proxy.tar bin/ config/ dist/ node_modules/ package.json package-lock.json readme.md
+    - run: tar czf minecraft-proxy.tar bin/ config/ dist/ node_modules/ package.json package-lock.json readme.md
       if: github.ref == 'refs/heads/master'
-    - name: Release
-      uses: fnkr/github-action-ghr@v1
-      if: github.ref == 'refs/heads/master'
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
       env:
-        GHR_COMPRESS: xz
-        GHR_PATH: minecraft-proxy.tar
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: false
+        prerelease: false
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./minecraft-proxy.tar.gz
+          asset_name: minecraft-proxy.tar.gz
+          asset_content_type: application/gzip
