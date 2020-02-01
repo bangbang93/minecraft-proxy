@@ -23,7 +23,6 @@ jobs:
     - run: npm install
     - run: npm run build --if-present
     - run: tar czf minecraft-proxy.tar.gz bin/ config/ dist/ node_modules/ package.json package-lock.json readme.md
-      if: github.ref == 'refs/heads/master'
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
@@ -41,6 +40,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./minecraft-proxy.tar.gz
+        asset_path: minecraft-proxy.tar.gz
         asset_name: minecraft-proxy.tar.gz
         asset_content_type: application/gzip
