@@ -22,7 +22,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: npm install
     - run: npm run build --if-present
-    - run: tar czf minecraft-proxy.tar.gz bin/ config/ dist/ node_modules/ package.json package-lock.json readme.md
+    - run: tar czf minecraft-proxy.tar.gz bin/ config/ dist/ node_modules/ package.json package-lock.json README.md
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
