@@ -1,0 +1,30 @@
+name: Node.js CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [8.x, 10.x, 12.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm install
+    - run: npm run build --if-present
+    - run: tar cvf minecraft-proxy.tar bin/ config/ dist/ node_modules/ package.json package-lock.json readme.md
+      if: github.ref == 'refs/master'
+    - name: Release
+      uses: fnkr/github-action-ghr@v1
+      if: github.ref == 'refs/master'
+      env:
+        GHR_COMPRESS: xz
+        GHR_PATH: build/
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
