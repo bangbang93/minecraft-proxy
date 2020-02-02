@@ -4,7 +4,7 @@ import {Container} from 'typedi'
 import {loadConfig} from './config'
 import {ProxyServer} from './proxy-server'
 
-async function bootstrap(): Promise<void> {
+export async function bootstrap(): Promise<void> {
   const config = await loadConfig()
   Container.set('config', config)
 
@@ -24,12 +24,14 @@ async function bootstrap(): Promise<void> {
   await proxy.listen()
 }
 
-bootstrap()
-  .catch((err) => {
-    // eslint-disable-next-line no-console
-    console.error(err)
-    process.exit(1)
-  })
+if (require.main === module) {
+  bootstrap()
+    .catch((err) => {
+      // eslint-disable-next-line no-console
+      console.error(err)
+      process.exit(1)
+    })
+}
 
 
 declare module 'minecraft-protocol' {

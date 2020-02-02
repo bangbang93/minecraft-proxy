@@ -22,7 +22,13 @@ async function main() {
     Logger.info('all workers started')
   } else {
     setupWorker(cluster.worker.id)
-    require('../dist/index')
+    const {bootstrap} = require('../dist/index')
+    bootstrap()
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error(err)
+        process.exit(1)
+      })
   }
 }
 
