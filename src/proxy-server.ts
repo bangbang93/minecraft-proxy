@@ -85,14 +85,23 @@ export class ProxyServer extends EventEmitter {
   }
 
   private isIpBanned(ip: string): boolean {
+    if (this.config.allowListOnly) {
+      return !this.config.allowList.ips.some((cidr) => cidr.contains(ip))
+    }
     return this.config.blockList.ips.some((cidr) => cidr.contains(ip))
   }
 
   private isUsernameBanned(username: string): boolean {
+    if (this.config.allowListOnly) {
+      return !this.config.allowList.usernames.includes(username)
+    }
     return this.config.blockList.usernames.includes(username)
   }
 
   private isUuidBanned(uuid: string): boolean {
+    if (this.config.allowListOnly) {
+      return !this.config.allowList.uuids.includes(uuid)
+    }
     return this.config.blockList.uuids.includes(uuid)
   }
 }

@@ -48,7 +48,9 @@ export class Config {
   @ValidateNested() proxy: ConfigProxy
   @ValidateNested({each: true}) @Type(() => ConfigServer) servers: ConfigServer[]
   @IsString() public defaultServer: string
+  @IsOptional() @IsBoolean() public allowListOnly: boolean = false
   @ValidateNested() public blockList: BlockList
+  @IsOptional() @ValidateNested() public allowList: BlockList
 }
 
 export async function loadConfig(path = join(__dirname, '../config/config.yml')): Promise<Config> {
