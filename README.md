@@ -57,6 +57,7 @@ servers:
     proxyPort: 25565
     version: 1.8.7
     handlePing: true
+    useProxy: true # 使用PROXY协议，当后端服务是Bungee时，同样启用PROXY协议，可以正确获取客户端IP
 blockList:
   ips: #同时会阻拦掉ping请求
     - 114.114.114.114
