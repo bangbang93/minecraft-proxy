@@ -14,6 +14,7 @@ export class Client extends EventEmitter {
   public protocolVersion: number
   public version = '1.8'
   public username: string
+  public fml: boolean = false
 
   private _state: States
   private _uuid: string
@@ -65,6 +66,11 @@ export class Client extends EventEmitter {
           case 'set_protocol':
             this.protocolVersion = params.protocolVersion
             this.host = params.serverHost
+            if (this.host.includes('\0')) {
+              const split = this.host.split('\0')
+              this.host = split[0]
+              this.fml = split[1] === 'FML'
+            }
             switch (params.nextState) {
               case 1:
                 this.state = states.STATUS
