@@ -99,6 +99,9 @@ export class Client extends EventEmitter {
     return new Promise((resolve) => {
       socket.on('connect', async () => {
         backend.addClient(this)
+        if (backend.useProxy) {
+          socket.write(`PROXY TCP4 ${this.socket.remoteAddress} ${socket.remoteAddress} ${this.socket.remotePort} ${socket.remotePort}\r\n`)
+        }
         let serializer: Duplex = createSerializer(
           {state: states.HANDSHAKING, isServer: false, version: backend.version, customPackets: {}},
         )

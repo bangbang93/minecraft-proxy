@@ -11,6 +11,7 @@ export interface IBackend {
   version: string
   handlePing: boolean
   onlineMode: boolean
+  useProxy: boolean
   ping: {
     maxPlayer: number
     description?: string
@@ -26,6 +27,7 @@ export class Backend implements IBackend {
   public readonly version: string
   public readonly handlePing: boolean
   public readonly onlineMode: boolean
+  public readonly useProxy: boolean
   public readonly ping: IBackend['ping']
 
   private clients = new Set<Client>()
@@ -40,6 +42,7 @@ export class Backend implements IBackend {
     this.handlePing = data.handlePing
     this.onlineMode = data.onlineMode
     this.ping = data.ping
+    this.useProxy = data.useProxy
 
     const minecraftData = MinecraftData(this.version)
     this.protocolVersion = minecraftData.version.version
