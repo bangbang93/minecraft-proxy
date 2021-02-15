@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 require('reflect-metadata')
-require('source-map-support')
+require('source-map-support/register')
 const cluster = require('cluster')
 const {loadConfig} = require('../dist/config')
 const {masterOnClusterMessage} = require('../dist/cluster')
