@@ -45,6 +45,7 @@ export class Backend implements IBackend {
     this.useProxy = data.useProxy
 
     const minecraftData = MinecraftData(this.version)
+    if (!minecraftData) throw new Error(`暂不支持${this.version}，请提交issue催促作者更新`)
     this.protocolVersion = minecraftData.version.version
   }
 

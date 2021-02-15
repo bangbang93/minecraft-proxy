@@ -1,7 +1,7 @@
 serverName: localhost
 proxyHost: localhost
 proxyPort: 25565
-version: 1.8.7
+version: 1.16.5
 handlePing: true
 onlineMode: true
 ping:
