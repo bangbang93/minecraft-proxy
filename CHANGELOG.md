@@ -1,5 +1,8 @@
 # Minecraft-Proxy
 
+## 1.1.1
++ 支持1.16+
+
 ## 1.1
 支持PROXY协议，当BungeeCord作为后端服务器时，启用PROXY可以避免丢失客户端IP
 
