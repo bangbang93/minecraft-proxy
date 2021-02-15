@@ -14,7 +14,7 @@ export class Client extends EventEmitter {
   public protocolVersion: number
   public version = '1.8'
   public username: string
-  public fml: boolean = false
+  public fml = false
 
   private _state: States
   private _uuid: string
@@ -80,7 +80,7 @@ export class Client extends EventEmitter {
                 this.state = states.LOGIN
                 break
               default:
-                throw new Error('wrong next state')
+                throw new Error(`wrong next state, except 1 or 2, got ${params.nextState}`)
             }
             break
           case 'login_start':
@@ -100,7 +100,10 @@ export class Client extends EventEmitter {
       socket.on('connect', async () => {
         backend.addClient(this)
         if (backend.useProxy) {
-          socket.write(`PROXY TCP4 ${this.socket.remoteAddress} ${socket.remoteAddress} ${this.socket.remotePort} ${socket.remotePort}\r\n`)
+          socket.write(
+            'PROXY TCP4 '
+            + `${this.socket.remoteAddress} ${socket.remoteAddress} ${this.socket.remotePort} ${socket.remotePort}\r\n`,
+          )
         }
         let serializer: Duplex = createSerializer(
           {state: states.HANDSHAKING, isServer: false, version: backend.version, customPackets: {}},
