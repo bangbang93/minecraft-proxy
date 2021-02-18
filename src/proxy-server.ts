@@ -34,11 +34,14 @@ export class ProxyServer extends EventEmitter {
     this.logger.info('ready')
   }
 
-  public addBackend(name: string, backend: IBackend): void {
-    if (this.backends.has(name)) {
-      throw new Error(`duplicate name ${name}`)
+  public addBackend(names: string[], backend: IBackend): void {
+    const be = new Backend(backend)
+    for (const name of names) {
+      if (this.backends.has(name)) {
+        throw new Error(`duplicate name ${name}`)
+      }
+      this.backends.set(name, be)
     }
-    this.backends.set(name, new Backend(backend))
   }
 
   public getBackend(name: string): Backend {

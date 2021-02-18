@@ -6,6 +6,7 @@ import * as IPCIDR from 'ip-cidr'
 import {cpus} from 'os'
 import {join} from 'path'
 import * as yimp from 'yaml-import'
+import { castArray } from 'lodash'
 
 class ConfigProxy {
   @Min(1) @Max(65535) public port: number
@@ -22,7 +23,7 @@ class ServerPingInfo {
 }
 
 class ConfigServer {
-  @IsString() public serverName: string
+  @IsString({each: true}) @Transform((v) => castArray(v)) public serverName: string[]
   @IsString() public proxyHost: string
   @Min(1) @Max(65535)  public proxyPort: number
   @IsString() public version: string

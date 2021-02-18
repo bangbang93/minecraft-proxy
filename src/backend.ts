@@ -5,7 +5,7 @@ import {Client} from './client'
 import {ClusterRequest} from './cluster'
 
 export interface IBackend {
-  serverName: string
+  serverName: string[]
   host: string
   port: number
   version: string
@@ -21,7 +21,7 @@ export interface IBackend {
 
 export class Backend implements IBackend {
   public readonly protocolVersion: number
-  public readonly serverName: string
+  public readonly serverName: string[]
   public readonly host: string
   public readonly port: number
   public readonly version: string
@@ -45,8 +45,10 @@ export class Backend implements IBackend {
     this.useProxy = data.useProxy
 
     const minecraftData = MinecraftData(this.version)
-    if (!minecraftData) throw new Error(`暂不支持${this.version}，请提交issue催促作者更新`)
-    this.protocolVersion = minecraftData.version.version
+    if (this.handlePing && !minecraftData) {
+      throw new Error(`不支持的版本: ${this.version}，不可启用handlePing功能`)
+    }
+    this.protocolVersion = minecraftData?.version?.version
   }
 
   public addClient(client: Client): void {
@@ -65,6 +67,6 @@ export class Backend implements IBackend {
       return this.clients.size
     }
 
-    return this.clusterRequest.getOnline(this.serverName)
+    return this.clusterRequest.getOnline(this.serverName[0])
   }
 }
