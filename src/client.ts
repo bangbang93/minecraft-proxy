@@ -8,6 +8,7 @@ import {connect, Socket} from 'net'
 import {Duplex} from 'stream'
 import {Backend} from './backend'
 import {ProxyServer} from './proxy-server'
+import { pick } from 'lodash'
 
 export class Client extends EventEmitter {
   public host: string
@@ -46,13 +47,14 @@ export class Client extends EventEmitter {
   }
 
   constructor(
-    private socket: Socket,
-    public proxy: ProxyServer,
+    private readonly socket: Socket,
+    public readonly proxy: ProxyServer,
   ) {
     super()
     this.socket.on('end', () => {
       this.emit('end')
     })
+    Object.assign(this.logger.fields, pick(socket, 'remoteAddress', 'remotePort'))
   }
 
   public async awaitHandshake(): Promise<number> {
@@ -85,6 +87,7 @@ export class Client extends EventEmitter {
             break
           case 'login_start':
             this.username = params.username
+            this.logger.fields['username'] = this.username
             this.splitter.removeAllListeners('data')
             return resolve(2)
           // no default
@@ -144,6 +147,7 @@ export class Client extends EventEmitter {
       })
       socket.on('error', (err) => {
         this.logger.error({err})
+        this.close(`failed to connect backend: ${err.message}`)
       })
     })
   }
