@@ -76,16 +76,18 @@ export class ProxyServer extends EventEmitter {
       const backend = await this.getBackend(client.host)
       if (!backend) return client.close(`${client.host} not found`)
       if (nextState === 2 || !backend.handlePing) {
-        if (client.username && this.isUsernameBanned(client.username)) {
-          this.logger.warn({ip: socket.remoteAddress, username: client.username}, `block username ${client.username}`)
-          client.close('username banned')
-          return
-        }
-        if (backend.onlineMode && this.isUuidBanned(await client.getUUID(backend))) {
-          this.logger.warn({ip: socket.remoteAddress, username: client.username, uuid: await client.getUUID(backend)},
-            `block uuid ${await client.getUUID(backend)}`)
-          client.close('uuid banned')
-          return
+        if (nextState === 2) {
+          if (client.username && this.isUsernameBanned(client.username)) {
+            this.logger.warn({ip: socket.remoteAddress, username: client.username}, `block username ${client.username}`)
+            client.close('username banned')
+            return
+          }
+          if (backend.onlineMode && this.isUuidBanned(await client.getUUID(backend))) {
+            this.logger.warn({ip: socket.remoteAddress, username: client.username, uuid: await client.getUUID(backend)},
+              `block uuid ${await client.getUUID(backend)}`)
+            client.close('uuid banned')
+            return
+          }
         }
         await client.pipeToBackend(backend, nextState)
       } else {
