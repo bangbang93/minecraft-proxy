@@ -201,8 +201,12 @@ export class Client extends EventEmitter {
   }
 
   public close(reason: string): void {
-    this.write('disconnect', {reason: JSON.stringify({text: reason})})
-    // this.socket.end()
+    try {
+      this.write('disconnect', {reason: JSON.stringify({text: reason})})
+    } catch (err) {
+      this.logger.warn(err, 'failed to disconnect')
+      this.kill()
+    }
   }
 
   public kill(): void {
