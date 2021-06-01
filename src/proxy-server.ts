@@ -1,4 +1,5 @@
 import * as Logger from 'bunyan'
+import {EventEmitter2} from 'eventemitter2'
 import {EventEmitter} from 'events'
 import {createServer, Server, Socket} from 'net'
 import {Container} from 'typedi'
@@ -9,6 +10,7 @@ import {Config} from './config'
 export class ProxyServer extends EventEmitter {
   public clients: Set<Client> = new Set()
   public defaultServer: string
+  public readonly pluginBus = new EventEmitter2()
 
   private server: Server
   private logger: Logger
@@ -44,9 +46,16 @@ export class ProxyServer extends EventEmitter {
     }
   }
 
-  public getBackend(name: string): Backend {
+  public async getBackend(name: string): Promise<Backend> {
     if (this.backends.has(name)) return this.backends.get(name)
     if (this.backends.has(this.defaultServer)) return this.backends.get(this.defaultServer)
+    if (this.pluginBus.hasListeners('backend.notfound')) {
+      const res = await this.pluginBus.emitAsync('backend.notfound', {name})
+      const dynamicBackend = res.find((e) => !!e)
+      if (dynamicBackend) {
+        return new Backend(dynamicBackend)
+      }
+    }
     return null
   }
 
@@ -63,7 +72,7 @@ export class ProxyServer extends EventEmitter {
       this.logger.error({err})
     })
     const nextState = await client.awaitHandshake()
-    const backend = this.getBackend(client.host)
+    const backend = await this.getBackend(client.host)
     if (!backend) return client.close(`${client.host} not found`)
     if (nextState === 2 || !backend.handlePing) {
       if (client.username && this.isUsernameBanned(client.username)) {

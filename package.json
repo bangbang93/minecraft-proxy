@@ -38,6 +38,8 @@
     "bunyan": "^1.8.12",
     "class-transformer": "^0.3.1",
     "class-validator": "^0.11.0",
+    "eventemitter2": "^6.4.4",
+    "globby": "^11.0.3",
     "got": "^10.4.0",
     "ip-cidr": "^2.0.6",
     "lodash": "^4.17.15",

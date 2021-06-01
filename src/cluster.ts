@@ -66,7 +66,7 @@ export class ClusterHandler implements IClusterRpc {
   @Inject('proxy') proxyServer: ProxyServer
 
   public async getOnline(name: string): Promise<number> {
-    const backend = this.proxyServer.getBackend(name)
+    const backend = await this.proxyServer.getBackend(name)
     if (!backend) return 0
     return backend.getOnline(true)
   }

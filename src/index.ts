@@ -1,8 +1,10 @@
+import * as globby from 'globby'
 import {States} from 'minecraft-protocol'
 import 'reflect-metadata'
 import {Container} from 'typedi'
 import {loadConfig} from './config'
 import {ProxyServer} from './proxy-server'
+import { join } from 'path'
 
 export async function bootstrap(): Promise<void> {
   const config = await loadConfig()
@@ -20,6 +22,11 @@ export async function bootstrap(): Promise<void> {
     })
   }
   proxy.defaultServer = config.defaultServer
+
+  for (const file of await globby(join(__dirname, '../plugins/*.js'))) {
+    const plugin = require(file)
+    plugin(proxy)
+  }
 
   await proxy.listen()
 }
