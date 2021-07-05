@@ -1,5 +1,5 @@
 FROM node:alpine AS BUILD
-RUN apk update3 && \
+RUN apk update && \
   apk add build-base python3
 WORKDIR /opt/minecraft-proxy
 COPY package-lock.json package.json tsconfig.json ./
