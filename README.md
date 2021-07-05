@@ -26,6 +26,10 @@ BungeeCord的目标是把多个Minecraft实例用起来像一个，minecraft-pro
 ```shell script
 docker run -p 25565:25565 -v ./config:/opt/minecraft-proxy/config bangbang93/minecraft-proxy
 ```
+#### 国内镜像
+```shell
+docker run -p 25565:25565 -v ./config:/opt/minecraft-proxy/config registry.bangbang93.com/bangbang93/minecraft-proxy
+```
 ### 手动编译
 ```shell script
 git clone git@github.com:bangbang93/minecraft-proxy.git
@@ -33,6 +37,8 @@ cd minecraft-proxy
 npm ci
 npm run build
 ```
+#### 国内镜像
+https://gitlab.bangbang93.com/bangbang93/minecraft-proxy
 
 ## 配置 config.yml
 ```yaml
