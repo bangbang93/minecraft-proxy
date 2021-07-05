@@ -4,7 +4,8 @@
   "description": "ProxyPass minecraft",
   "main": "index.js",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "true"
   },
   "repository": {
     "type": "git",
