@@ -46,7 +46,7 @@ proxy:
   port: 25565 #监听端口
   host: 0.0.0.0 #监听ip
   workers: 0 #worker数量，以便充分利用多核服务器，0代表用上全部核心
-defaultServer: localhost #默认服务器，若不想指定，删除此行或设为false
+defaultServer: localhost #默认服务器，若不想指定，则删除此行
 servers:
   - serverName: localhost #服务连接的主机名
     proxyHost: localhost # 后端服务实际ip

@@ -46,7 +46,9 @@ export class ProxyServer extends EventEmitter {
 
   public getBackend(name: string): Backend {
     if (this.backends.has(name)) return this.backends.get(name)
-    if (this.backends.has(this.defaultServer)) return this.backends.get(this.defaultServer)
+    if (this.defaultServer) {
+      if (this.backends.has(this.defaultServer)) return this.backends.get(this.defaultServer)
+    }
     return null
   }
 
