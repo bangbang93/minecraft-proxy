@@ -185,7 +185,7 @@ export class Client extends EventEmitter {
   public async getUUID(backend: Backend): Promise<string> {
     if (this._uuid) return this._uuid
     if (!backend.onlineMode) {
-      this._uuid = createHash('md5').update(this.username).digest('hex')
+      this._uuid = createHash('md5').update('OfflinePlayer:').update(this.username).digest('hex')
     } else {
       const resp = await got<{id: string; name: string}[]>(
         'https://api.mojang.com/profiles/minecraft',
