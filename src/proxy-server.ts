@@ -77,6 +77,7 @@ export class ProxyServer extends EventEmitter {
       if (!backend) return client.close(`${client.host} not found`)
       if (nextState === 2 || !backend.handlePing) {
         if (nextState === 2) {
+          if (nextState === 2) {
           if (client.username && this.isUsernameBanned(client.username)) {
             this.logger.warn({ip: socket.remoteAddress, username: client.username}, `block username ${client.username}`)
             client.close('username banned')
@@ -89,7 +90,7 @@ export class ProxyServer extends EventEmitter {
             return
           }
         }
-        await client.pipeToBackend(backend, nextState)
+        }await client.pipeToBackend(backend, nextState)
       } else {
         await client.responsePing(backend)
       }

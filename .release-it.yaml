@@ -1,0 +1,9 @@
+npm:
+  skipChecks: true
+  publish: true
+git:
+  commit: true
+  push: true
+  tag: true
+hooks:
+  after:version:bump: auto-changelog -p
