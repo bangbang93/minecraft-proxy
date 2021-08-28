@@ -99,7 +99,7 @@ export class Client extends EventEmitter {
   public async pipeToBackend(backend: Backend, nextState: number): Promise<Socket> {
     this.socket.unpipe()
     const socket = connect(backend.port, backend.host)
-    return new Promise((resolve) => {
+    return new Promise<Socket>((resolve) => {
       socket.on('connect', async () => {
         backend.addClient(this)
         if (backend.useProxy) {
@@ -142,7 +142,7 @@ export class Client extends EventEmitter {
         }
         this.socket.pipe(socket)
         socket.pipe(this.socket)
-        resolve()
+        resolve(socket)
       })
       socket.on('close', () => {
         backend.removeClient(this)

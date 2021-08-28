@@ -27,8 +27,8 @@ export class ProxyServer extends EventEmitter {
   public async listen(): Promise<void> {
     if (this.server) throw new Error('already listen')
     const server = this.server = createServer()
-    await new Promise((resolve) => {
-      server.listen(this.port, this.host, resolve)
+    await new Promise<void>((resolve) => {
+      server.listen(this.port, this.host, () => resolve())
     })
     server.on('connection', async (socket) => this.onConnection(socket))
     this.logger.info('ready')
