@@ -114,9 +114,11 @@ export class Client extends EventEmitter {
         const framer: Duplex = framing.createFramer()
         serializer.pipe(framer).pipe(socket)
         if (this.username) {
+          const serverHost: string[] = [backend.host, this.socket.remoteAddress, await this.getUUID(backend)]
+          if (this.fml) serverHost.push('FML\0')
           serializer.write({name: 'set_protocol', params: {
             protocolVersion: this.protocolVersion,
-            serverHost: `${backend.host}\0${this.socket.remoteAddress}\0${await this.getUUID(backend)}`,
+            serverHost: serverHost.join('\0'),
             serverPort: backend.port, nextState,
           }})
           serializer = createSerializer(
