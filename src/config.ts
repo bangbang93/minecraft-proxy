@@ -1,6 +1,6 @@
 import {plainToClass, Transform, Type} from 'class-transformer'
 import {
-  IsBoolean, IsInstance, IsInt, IsOptional, IsString, Max, Min, ValidateIf, ValidateNested, validateOrReject,
+  IsBoolean, IsInstance, IsInt, IsOptional, IsString, IsUrl, Max, Min, ValidateIf, ValidateNested, validateOrReject,
 } from 'class-validator'
 import * as IPCIDR from 'ip-cidr'
 import {cpus} from 'os'
@@ -53,6 +53,7 @@ export class Config {
   @IsOptional() @IsBoolean() public allowListOnly: boolean = false
   @ValidateNested() public blockList: BlockList
   @IsOptional() @ValidateNested() public allowList: BlockList
+  @IsUrl({protocols: ['http', 'https']}) profileEndpoint = 'https://api.mojang.com/profiles/minecraft'
 }
 
 export async function loadConfig(path = join(__dirname, '../config/config.yml')): Promise<Config> {

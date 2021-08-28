@@ -1,4 +1,6 @@
+import {LoggerOptions} from 'bunyan'
 import * as Logger from 'bunyan'
+import {isWorker, worker} from 'cluster'
 import {EventEmitter} from 'events'
 import {createServer, Server, Socket} from 'net'
 import {Container} from 'typedi'
@@ -9,19 +11,27 @@ import {Config} from './config'
 export class ProxyServer extends EventEmitter {
   public clients: Set<Client> = new Set()
   public defaultServer: string
+  public readonly config: Config = Container.get('config')
 
   private server: Server
   private logger: Logger
 
   private backends: Map<string, Backend> = new Map()
-  private config: Config = Container.get('config')
+
+  public static getConfig(): Config {
+    return Container.get('config')
+  }
 
   constructor(
     private port: number,
     private host?: string,
   ) {
     super()
-    this.logger = Logger.createLogger({name: 'server', port, host})
+    const loggerOptions: LoggerOptions = {name: 'server', port, host}
+    if (isWorker) {
+      loggerOptions.worker = worker.id
+    }
+    this.logger = Logger.createLogger(loggerOptions)
   }
 
   public async listen(): Promise<void> {

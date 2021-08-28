@@ -7,6 +7,7 @@ import * as framing from 'minecraft-protocol/src/transforms/framing'
 import {connect, Socket} from 'net'
 import {Duplex} from 'stream'
 import {Backend} from './backend'
+import {Config} from './config'
 import {ProxyServer} from './proxy-server'
 import { pick } from 'lodash'
 
@@ -24,6 +25,7 @@ export class Client extends EventEmitter {
   private deserializer
   private serializer
   private logger = createLogger({name: 'client'})
+  private readonly config: Config
 
   public get state(): States {
     return this._state
@@ -55,6 +57,7 @@ export class Client extends EventEmitter {
       this.emit('end')
     })
     Object.assign(this.logger.fields, pick(socket, 'remoteAddress', 'remotePort'))
+    this.config = proxy.config
   }
 
   public async awaitHandshake(): Promise<number> {
@@ -193,7 +196,7 @@ export class Client extends EventEmitter {
       this._uuid = buf.toString('hex')
     } else {
       const resp = await got<{id: string; name: string}[]>(
-        'https://api.mojang.com/profiles/minecraft',
+        this.config.profileEndpoint,
         {method: 'POST', responseType: 'json', body: JSON.stringify([this.username])},
       )
       if (resp.body.length > 0) {
