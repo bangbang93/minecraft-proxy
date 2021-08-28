@@ -72,7 +72,10 @@ blockList:
     - BadGays
   uuids: # 只有开了正版验证的服务端可以封禁uuid，离线服务器只能用usernames
     - 12b8b9e0eba0ca37e935f037ff1ae90d
+profileEndpoint: https://api.mojang.com/profiles/minecraft # 若使用authlib-injector，则将改地址替换为对应的api地址
 ```
+
+profileEndpoint地址详见[authlib-injector文档](https://github.com/yushijinhun/authlib-injector/wiki/Yggdrasil-%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%8A%80%E6%9C%AF%E8%A7%84%E8%8C%83#%E6%8C%89%E5%90%8D%E7%A7%B0%E6%89%B9%E9%87%8F%E6%9F%A5%E8%AF%A2%E8%A7%92%E8%89%B2)
 
 默认服务器： 当未找到对应的服务器主机名时，会连接默认服务器，若无默认服务器，则会断开连接
 

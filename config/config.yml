@@ -12,3 +12,4 @@ blockList:
 servers:
   !!import/sequence
   - servers/
+profileEndpoint: https://api.mojang.com/profiles/minecraft

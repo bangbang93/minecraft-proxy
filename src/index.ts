@@ -39,8 +39,3 @@ if (require.main === module) {
       process.exit(1)
     })
 }
-
-
-declare module 'minecraft-protocol' {
-  export const states: typeof States
-}

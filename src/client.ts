@@ -7,6 +7,7 @@ import * as framing from 'minecraft-protocol/src/transforms/framing'
 import {connect, Socket} from 'net'
 import {Duplex} from 'stream'
 import {Backend} from './backend'
+import {Config} from './config'
 import {ProxyServer} from './proxy-server'
 import { pick } from 'lodash'
 
@@ -24,6 +25,7 @@ export class Client extends EventEmitter {
   private deserializer
   private serializer
   private logger = createLogger({name: 'client'})
+  private readonly config: Config
 
   public get state(): States {
     return this._state
@@ -55,6 +57,7 @@ export class Client extends EventEmitter {
       this.emit('end')
     })
     Object.assign(this.logger.fields, pick(socket, 'remoteAddress', 'remotePort'))
+    this.config = proxy.config
   }
 
   public async awaitHandshake(): Promise<number> {
@@ -99,7 +102,7 @@ export class Client extends EventEmitter {
   public async pipeToBackend(backend: Backend, nextState: number): Promise<Socket> {
     this.socket.unpipe()
     const socket = connect(backend.port, backend.host)
-    return new Promise((resolve) => {
+    return new Promise<Socket>((resolve) => {
       socket.on('connect', async () => {
         backend.addClient(this)
         if (backend.useProxy) {
@@ -114,9 +117,11 @@ export class Client extends EventEmitter {
         const framer: Duplex = framing.createFramer()
         serializer.pipe(framer).pipe(socket)
         if (this.username) {
+          const serverHost: string[] = [backend.host, this.socket.remoteAddress, await this.getUUID(backend)]
+          if (this.fml) serverHost.push('FML\0')
           serializer.write({name: 'set_protocol', params: {
             protocolVersion: this.protocolVersion,
-            serverHost: `${backend.host}\0${this.socket.remoteAddress}\0${await this.getUUID(backend)}`,
+            serverHost: serverHost.join('\0'),
             serverPort: backend.port, nextState,
           }})
           serializer = createSerializer(
@@ -140,7 +145,7 @@ export class Client extends EventEmitter {
         }
         this.socket.pipe(socket)
         socket.pipe(this.socket)
-        resolve()
+        resolve(socket)
       })
       socket.on('close', () => {
         backend.removeClient(this)
@@ -191,7 +196,7 @@ export class Client extends EventEmitter {
       this._uuid = buf.toString('hex')
     } else {
       const resp = await got<{id: string; name: string}[]>(
-        'https://api.mojang.com/profiles/minecraft',
+        this.config.profileEndpoint,
         {method: 'POST', responseType: 'json', body: JSON.stringify([this.username])},
       )
       if (resp.body.length > 0) {

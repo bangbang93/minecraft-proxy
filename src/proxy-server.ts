@@ -1,5 +1,7 @@
+import {LoggerOptions} from 'bunyan'
 import * as Logger from 'bunyan'
 import {EventEmitter2} from 'eventemitter2'
+import {isWorker, worker} from 'cluster'
 import {EventEmitter} from 'events'
 import {createServer, Server, Socket} from 'net'
 import {Container} from 'typedi'
@@ -11,26 +13,34 @@ export class ProxyServer extends EventEmitter {
   public clients: Set<Client> = new Set()
   public defaultServer: string
   public readonly pluginBus = new EventEmitter2()
+  public readonly config: Config = Container.get('config')
 
   private server: Server
   private logger: Logger
 
   private backends: Map<string, Backend> = new Map()
-  private config: Config = Container.get('config')
+
+  public static getConfig(): Config {
+    return Container.get('config')
+  }
 
   constructor(
     private port: number,
     private host?: string,
   ) {
     super()
-    this.logger = Logger.createLogger({name: 'server', port, host})
+    const loggerOptions: LoggerOptions = {name: 'server', port, host}
+    if (isWorker) {
+      loggerOptions.worker = worker.id
+    }
+    this.logger = Logger.createLogger(loggerOptions)
   }
 
   public async listen(): Promise<void> {
     if (this.server) throw new Error('already listen')
     const server = this.server = createServer()
-    await new Promise((resolve) => {
-      server.listen(this.port, this.host, resolve)
+    await new Promise<void>((resolve) => {
+      server.listen(this.port, this.host, () => resolve())
     })
     server.on('connection', async (socket) => this.onConnection(socket))
     this.logger.info('ready')
