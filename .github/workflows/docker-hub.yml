@@ -10,8 +10,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag bangbang93/openbmclapi
+        run: docker build . --file Dockerfile --tag bangbang93/minecraft-proxy
       - name: Login to docker hub
         run: docker login -u ${{secrets.HUB_USERNAME}} -p ${{secrets.HUB_PASSWORD}}
       - name: Publish image
-        run: docker push bangbang93/openbmclapi
+        run: docker push bangbang93/minecraft-proxy
