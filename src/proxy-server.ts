@@ -1,6 +1,4 @@
-import {LoggerOptions} from 'bunyan'
 import * as Logger from 'bunyan'
-import {EventEmitter2} from 'eventemitter2'
 import {isWorker, worker} from 'cluster'
 import {EventEmitter} from 'events'
 import {createServer, Server, Socket} from 'net'
@@ -8,32 +6,34 @@ import {Container} from 'typedi'
 import {Backend, IBackend} from './backend'
 import {Client} from './client'
 import {Config} from './config'
+import {Plugin} from './plugin'
 
 export class ProxyServer extends EventEmitter {
   public clients: Set<Client> = new Set()
   public defaultServer: string
-  public readonly pluginBus = new EventEmitter2()
   public readonly config: Config = Container.get('config')
+  public readonly plugin = Container.get(Plugin)
+  public readonly workdir = process.cwd()
 
   private server: Server
   private logger: Logger
 
   private backends: Map<string, Backend> = new Map()
 
-  public static getConfig(): Config {
-    return Container.get('config')
-  }
-
   constructor(
     private port: number,
     private host?: string,
   ) {
     super()
-    const loggerOptions: LoggerOptions = {name: 'server', port, host}
+    const loggerOptions: Logger.LoggerOptions = {name: 'server', port, host}
     if (isWorker) {
       loggerOptions.worker = worker.id
     }
     this.logger = Logger.createLogger(loggerOptions)
+  }
+
+  public static getConfig(): Config {
+    return Container.get('config')
   }
 
   public async listen(): Promise<void> {
@@ -59,12 +59,9 @@ export class ProxyServer extends EventEmitter {
   public async getBackend(name: string): Promise<Backend> {
     if (this.backends.has(name)) return this.backends.get(name)
     if (this.backends.has(this.defaultServer)) return this.backends.get(this.defaultServer)
-    if (this.pluginBus.hasListeners('backend.notfound')) {
-      const res = await this.pluginBus.emitAsync('backend.notfound', {name})
-      const dynamicBackend = res.find((e) => !!e)
-      if (dynamicBackend) {
-        return new Backend(dynamicBackend)
-      }
+    const dynamicBackend = await this.plugin.hooks.server.lookupBackend.promise(name)
+    if (dynamicBackend) {
+      return new Backend(dynamicBackend)
     }
     return null
   }
@@ -87,20 +84,22 @@ export class ProxyServer extends EventEmitter {
       if (!backend) return client.close(`${client.host} not found`)
       if (nextState === 2 || !backend.handlePing) {
         if (nextState === 2) {
-          if (nextState === 2) {
           if (client.username && this.isUsernameBanned(client.username)) {
-            this.logger.warn({ip: socket.remoteAddress, username: client.username}, `block username ${client.username}`)
+            this.logger.warn({
+              ip: socket.remoteAddress, username: client.username,
+            }, `block username ${client.username}`)
             client.close('username banned')
             return
           }
           if (backend.onlineMode && this.isUuidBanned(await client.getUUID(backend))) {
-            this.logger.warn({ip: socket.remoteAddress, username: client.username, uuid: await client.getUUID(backend)},
-              `block uuid ${await client.getUUID(backend)}`)
+            this.logger.warn({
+              ip: socket.remoteAddress, username: client.username, uuid: await client.getUUID(backend),
+            }, `block uuid ${await client.getUUID(backend)}`)
             client.close('uuid banned')
             return
           }
         }
-        }await client.pipeToBackend(backend, nextState)
+        await client.pipeToBackend(backend, nextState)
       } else {
         await client.responsePing(backend)
       }

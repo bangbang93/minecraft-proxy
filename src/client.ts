@@ -2,6 +2,7 @@ import {createLogger} from 'bunyan'
 import {createHash} from 'crypto'
 import {EventEmitter} from 'events'
 import got from 'got'
+import {pick} from 'lodash'
 import {createDeserializer, createSerializer, states, States} from 'minecraft-protocol'
 import * as framing from 'minecraft-protocol/src/transforms/framing'
 import {connect, Socket} from 'net'
@@ -9,7 +10,6 @@ import {Duplex} from 'stream'
 import {Backend} from './backend'
 import {Config} from './config'
 import {ProxyServer} from './proxy-server'
-import { pick } from 'lodash'
 
 export class Client extends EventEmitter {
   public host: string
@@ -26,6 +26,18 @@ export class Client extends EventEmitter {
   private serializer
   private logger = createLogger({name: 'client'})
   private readonly config: Config
+
+  constructor(
+    private readonly socket: Socket,
+    public readonly proxy: ProxyServer,
+  ) {
+    super()
+    this.socket.on('end', () => {
+      this.emit('end')
+    })
+    Object.assign(this.logger.fields, pick(socket, 'remoteAddress', 'remotePort'))
+    this.config = proxy.config
+  }
 
   public get state(): States {
     return this._state
@@ -46,18 +58,6 @@ export class Client extends EventEmitter {
     )
     this.socket.pipe(this.splitter)
     this.serializer.pipe(this.framer).pipe(this.socket)
-  }
-
-  constructor(
-    private readonly socket: Socket,
-    public readonly proxy: ProxyServer,
-  ) {
-    super()
-    this.socket.on('end', () => {
-      this.emit('end')
-    })
-    Object.assign(this.logger.fields, pick(socket, 'remoteAddress', 'remotePort'))
-    this.config = proxy.config
   }
 
   public async awaitHandshake(): Promise<number> {
@@ -190,7 +190,8 @@ export class Client extends EventEmitter {
   public async getUUID(backend: Backend): Promise<string> {
     if (this._uuid) return this._uuid
     if (!backend.onlineMode) {
-      const buf = createHash('md5').update('OfflinePlayer:').update(this.username).digest()
+      const buf = createHash('md5').update('OfflinePlayer:').update(this.username)
+        .digest()
       buf[6] = buf[6] & 0x0f | 0x30
       buf[8] = buf[8] & 0x3f | 0x80
       this._uuid = buf.toString('hex')

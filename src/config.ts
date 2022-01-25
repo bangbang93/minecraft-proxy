@@ -1,12 +1,13 @@
 import {plainToClass, Transform, Type} from 'class-transformer'
 import {
+  IsArray,
   IsBoolean, IsInstance, IsInt, IsOptional, IsString, IsUrl, Max, Min, ValidateIf, ValidateNested, validateOrReject,
 } from 'class-validator'
 import * as IPCIDR from 'ip-cidr'
+import {castArray} from 'lodash'
 import {cpus} from 'os'
 import {join} from 'path'
 import * as yimp from 'yaml-import'
-import { castArray } from 'lodash'
 
 class ConfigProxy {
   @Min(1) @Max(65535) public port: number
@@ -54,6 +55,7 @@ export class Config {
   @ValidateNested() public blockList: BlockList
   @IsOptional() @ValidateNested() public allowList: BlockList
   @IsUrl({protocols: ['http', 'https']}) profileEndpoint = 'https://api.mojang.com/profiles/minecraft'
+  @IsOptional() @IsArray() @IsString({each: true}) plugins: string[] = []
 }
 
 export async function loadConfig(path = join(__dirname, '../config/config.yml')): Promise<Config> {
