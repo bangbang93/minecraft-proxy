@@ -26,6 +26,7 @@ export class Client extends EventEmitter {
   private serializer
   private logger = createLogger({name: 'client'})
   private readonly config: Config
+  private _closed: boolean
 
   constructor(
     private readonly socket: Socket,
@@ -37,6 +38,10 @@ export class Client extends EventEmitter {
     })
     Object.assign(this.logger.fields, pick(socket, 'remoteAddress', 'remotePort'))
     this.config = proxy.config
+  }
+
+  public get closed(): boolean {
+    return this._closed
   }
 
   public get state(): States {
@@ -101,6 +106,9 @@ export class Client extends EventEmitter {
 
   public async pipeToBackend(backend: Backend, nextState: number): Promise<Socket> {
     this.socket.unpipe()
+    await this.proxy.plugin.hooks.server.prePipeToBackend.promise(this)
+    if (this.closed) return
+
     const socket = connect(backend.port, backend.host)
     return new Promise<Socket>((resolve) => {
       socket.on('connect', async () => {
@@ -212,6 +220,7 @@ export class Client extends EventEmitter {
   public close(reason: string): void {
     try {
       this.write('disconnect', {reason: JSON.stringify({text: reason})})
+      this._closed = true
     } catch (err) {
       this.logger.warn(err, 'failed to disconnect')
       this.kill()
