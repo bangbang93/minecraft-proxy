@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc",
     "test": "true",
-    "dev": "ts-node src/index.ts"
+    "dev": "ts-node src/main.ts"
   },
   "repository": {
     "type": "git",
@@ -48,7 +48,7 @@
     "got": "^10.4.0",
     "ip-cidr": "^2.0.6",
     "lodash": "^4.17.15",
-    "minecraft-data": "^2.86.0",
+    "minecraft-data": "^2.110.0",
     "minecraft-protocol": "^1.10.0",
     "reflect-metadata": "^0.1.13",
     "source-map-support": "^0.5.16",

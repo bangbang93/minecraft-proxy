@@ -10,13 +10,13 @@ import {Client} from './client'
 import {Config} from './config'
 import {ProxyServer} from './proxy-server'
 
-interface IPlugin {
+export interface IPlugin {
   name: string
-  new(server: ProxyServer, plugin: Plugin)
+  new(server: ProxyServer, plugin: PluginHook)
 }
 
 @Service()
-export class Plugin {
+export class PluginHook {
   public readonly hooks = Object.freeze({
     server: {
       lookupBackend: new AsyncSeriesBailHook<[string], IBackend>(['serverName']),

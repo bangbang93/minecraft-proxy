@@ -6,13 +6,13 @@ import {Container} from 'typedi'
 import {Backend, IBackend} from './backend'
 import {Client} from './client'
 import {Config} from './config'
-import {Plugin} from './plugin'
+import {PluginHook} from './plugin-hook'
 
 export class ProxyServer extends EventEmitter {
   public clients: Set<Client> = new Set()
   public defaultServer: string
   public readonly config: Config = Container.get('config')
-  public readonly plugin = Container.get(Plugin)
+  public readonly plugin = Container.get(PluginHook)
   public readonly workdir = process.cwd()
 
   private server: Server
