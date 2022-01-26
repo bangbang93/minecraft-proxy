@@ -38,7 +38,7 @@ export class PluginHook {
     for (const pluginPackage of this.config.plugins) {
       try {
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const plugin = require(pluginPackage)
+        const plugin = require(pluginPackage).default
         const instance = new plugin(this.server, this)
         let name = instance.name
         if (!name) {
