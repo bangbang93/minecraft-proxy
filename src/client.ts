@@ -106,7 +106,7 @@ export class Client extends EventEmitter {
 
   public async pipeToBackend(backend: Backend, nextState: number): Promise<Socket> {
     this.socket.unpipe()
-    await this.proxy.plugin.hooks.server.prePipeToBackend.promise(this)
+    await this.proxy.plugin.hooks.server.prePipeToBackend.promise(this, backend)
     if (this.closed) return
 
     const socket = connect(backend.port, backend.host)

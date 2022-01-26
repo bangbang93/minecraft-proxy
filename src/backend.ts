@@ -12,7 +12,7 @@ export interface IBackend {
   handlePing: boolean
   onlineMode: boolean
   useProxy: boolean
-  ping: {
+  ping?: {
     maxPlayer: number
     description?: string
     favicon?: string

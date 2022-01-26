@@ -5,7 +5,7 @@ import {isEmpty} from 'lodash'
 import {AsyncParallelHook, AsyncSeriesBailHook} from 'tapable'
 import {Service} from 'typedi'
 import {VError} from 'verror'
-import {IBackend} from './backend'
+import {Backend, IBackend} from './backend'
 import {Client} from './client'
 import {Config} from './config'
 import {ProxyServer} from './proxy-server'
@@ -20,7 +20,7 @@ export class PluginHook {
   public readonly hooks = Object.freeze({
     server: {
       lookupBackend: new AsyncSeriesBailHook<[string], IBackend>(['serverName']),
-      prePipeToBackend: new AsyncParallelHook<[Client]>(),
+      prePipeToBackend: new AsyncParallelHook<[Client, Backend]>(),
     },
   })
 
