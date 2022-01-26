@@ -2,11 +2,14 @@
   "name": "minecraft-proxy",
   "version": "1.4.0",
   "description": "ProxyPass minecraft",
-  "main": "index.js",
+  "exports": "./dist/index.js",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "test": "true",
-    "dev": "ts-node src/main.ts"
+    "dev": "ts-node src/main.ts",
+    "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
