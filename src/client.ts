@@ -1,6 +1,6 @@
 import {createLogger} from 'bunyan'
 import {createHash} from 'crypto'
-import {EventEmitter} from 'events'
+import {EventEmitter, once} from 'events'
 import got from 'got'
 import {pick} from 'lodash'
 import {createDeserializer, createSerializer, states, States} from 'minecraft-protocol'
@@ -110,59 +110,58 @@ export class Client extends EventEmitter {
     if (this.closed) return
 
     const socket = connect(backend.port, backend.host)
-    return new Promise<Socket>((resolve) => {
-      socket.on('connect', async () => {
-        backend.addClient(this)
-        if (backend.useProxy) {
-          socket.write(
-            'PROXY TCP4 '
-            + `${this.socket.remoteAddress} ${socket.remoteAddress} ${this.socket.remotePort} ${socket.remotePort}\r\n`,
-          )
-        }
-        let serializer: Duplex = createSerializer(
-          {state: states.HANDSHAKING, isServer: false, version: backend.version, customPackets: {}},
-        )
-        const framer: Duplex = framing.createFramer()
-        serializer.pipe(framer).pipe(socket)
-        if (this.username) {
-          const serverHost: string[] = [backend.host, this.socket.remoteAddress, await this.getUUID(backend)]
-          if (this.fml) serverHost.push('FML\0')
-          serializer.write({name: 'set_protocol', params: {
-            protocolVersion: this.protocolVersion,
-            serverHost: serverHost.join('\0'),
-            serverPort: backend.port, nextState,
-          }})
-          serializer = createSerializer(
-            {state: states.LOGIN, isServer: false, version: backend.version, customPackets: {}},
-          )
-          serializer.pipe(framer)
-          serializer.write({name: 'login_start', params: {username: this.username}})
-        } else {
-          serializer.write({name: 'set_protocol', params: {
-            protocolVersion: this.protocolVersion,
-            serverHost: `${backend.host}`,
-            serverPort: backend.port, nextState,
-          }})
-        }
-        if (nextState === 1) {
-          serializer = createSerializer(
-            {state: states.STATUS, isServer: false, version: backend.version, customPackets: {}},
-          )
-          serializer.pipe(framer)
-          serializer.write({name: 'ping_start', params: {}})
-        }
-        this.socket.pipe(socket)
-        socket.pipe(this.socket)
-        resolve(socket)
-      })
-      socket.on('close', () => {
-        backend.removeClient(this)
-      })
-      socket.on('error', (err) => {
-        this.logger.error({err})
-        this.close(`failed to connect backend: ${err.message}`)
-      })
+    await once(socket, 'connect')
+    backend.addClient(this)
+    if (backend.useProxy) {
+      socket.write(
+        'PROXY TCP4 '
+        + `${this.socket.remoteAddress} ${socket.remoteAddress} ${this.socket.remotePort} ${socket.remotePort}\r\n`,
+      )
+    }
+    let serializer: Duplex = createSerializer(
+      {state: states.HANDSHAKING, isServer: false, version: backend.version, customPackets: {}},
+    )
+    const framer: Duplex = framing.createFramer()
+    serializer.pipe(framer).pipe(socket)
+    if (this.username) {
+      const serverHost: string[] = [backend.host, this.socket.remoteAddress, await this.getUUID(backend)]
+      if (this.fml) serverHost.push('FML\0')
+      serializer.write({name: 'set_protocol', params: {
+        protocolVersion: this.protocolVersion,
+        serverHost: serverHost.join('\0'),
+        serverPort: backend.port, nextState,
+      }})
+      serializer = createSerializer(
+        {state: states.LOGIN, isServer: false, version: backend.version, customPackets: {}},
+      )
+      serializer.pipe(framer)
+      serializer.write({name: 'login_start', params: {username: this.username}})
+    } else {
+      serializer.write({name: 'set_protocol', params: {
+        protocolVersion: this.protocolVersion,
+        serverHost: `${backend.host}`,
+        serverPort: backend.port, nextState,
+      }})
+    }
+    if (nextState === 1) {
+      serializer = createSerializer(
+        {state: states.STATUS, isServer: false, version: backend.version, customPackets: {}},
+      )
+      serializer.pipe(framer)
+      serializer.write({name: 'ping_start', params: {}})
+    }
+    this.socket.pipe(socket)
+    socket.pipe(this.socket)
+
+    socket.on('close', () => {
+      backend.removeClient(this)
     })
+    socket.on('error', (err) => {
+      this.logger.error({err})
+      this.close(`failed to connect backend: ${err.message}`)
+    })
+
+    return socket
   }
 
   public async responsePing(backend: Backend): Promise<void> {
