@@ -220,6 +220,7 @@ export class Client extends EventEmitter {
     try {
       this.write('disconnect', {reason: JSON.stringify({text: reason})})
       this._closed = true
+      this.logger.info(`force disconnecting ${this.socket.address()}, reason: ${reason}`)
     } catch (err) {
       this.logger.warn(err, 'failed to disconnect')
       this.kill()
