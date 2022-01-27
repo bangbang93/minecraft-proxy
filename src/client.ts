@@ -68,40 +68,35 @@ export class Client extends EventEmitter {
   public async awaitHandshake(): Promise<number> {
     if (this.host) return
     this.state = states.HANDSHAKING
-    return new Promise<number>((resolve) => {
-      this.splitter.on('data', (chunk) => {
-        const packet = this.deserializer.parsePacketBuffer(chunk)
-        const {name, params} = packet.data
-        switch (name) {
-          case 'set_protocol':
-            this.protocolVersion = params.protocolVersion
-            this.host = params.serverHost
-            if (this.host.includes('\0')) {
-              const split = this.host.split('\0')
-              this.host = split[0]
-              this.fml = split[1] === 'FML'
-            }
-            switch (params.nextState) {
-              case 1:
-                this.state = states.STATUS
-                this.splitter.removeAllListeners('data')
-                return resolve(params.nextState)
-              case 2:
-                this.state = states.LOGIN
-                break
-              default:
-                throw new Error(`wrong next state, except 1 or 2, got ${params.nextState}`)
-            }
-            break
-          case 'login_start':
-            this.username = params.username
-            this.logger.fields['username'] = this.username
-            this.splitter.removeAllListeners('data')
-            return resolve(2)
-          // no default
-        }
-      })
-    })
+    for await (const chunk of this.splitter) {
+      const packet = this.deserializer.parsePacketBuffer(chunk)
+      const {name, params} = packet.data
+      switch (name) {
+        case 'set_protocol':
+          this.protocolVersion = params.protocolVersion
+          this.host = params.serverHost
+          if (this.host.includes('\0')) {
+            const split = this.host.split('\0')
+            this.host = split[0]
+            this.fml = split[1] === 'FML'
+          }
+          switch (params.nextState) {
+            case 1:
+              this.state = states.STATUS
+              return params.nextState
+            case 2:
+              this.state = states.LOGIN
+              continue
+            default:
+              throw new Error(`wrong next state, except 1 or 2, got ${params.nextState}`)
+          }
+        case 'login_start':
+          this.username = params.username
+          this.logger.fields['username'] = this.username
+          return 2
+        // no default
+      }
+    }
   }
 
   public async pipeToBackend(backend: Backend, nextState: number): Promise<Socket> {
