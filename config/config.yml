@@ -14,4 +14,4 @@ servers:
   - servers/
 profileEndpoint: https://api.mojang.com/profiles/minecraft
 plugins:
-  - test
+#  - test

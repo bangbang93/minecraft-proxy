@@ -10,9 +10,11 @@ import {Client} from './client'
 import {Config} from './config'
 import {ProxyServer} from './proxy-server'
 
-export interface IPlugin {
-  name: string
-  new(server: ProxyServer, plugin: PluginHook)
+export abstract class MinecraftProxyPlugin {
+  abstract name: string
+  protected constructor(
+    protected readonly server: ProxyServer, protected readonly plugin: PluginHook,
+  ) {}
 }
 
 @Service()
@@ -24,7 +26,7 @@ export class PluginHook {
     },
   })
 
-  public readonly plugins = new Map<string, IPlugin>()
+  public readonly plugins = new Map<string, MinecraftProxyPlugin>()
 
   private readonly logger: Logger = createLogger({name: 'plugin'})
 
@@ -59,8 +61,8 @@ export class PluginHook {
     }
   }
 
-  private constructPlugin(plugin: unknown): IPlugin {
+  private constructPlugin(plugin: unknown): MinecraftProxyPlugin {
     if (!is.class_(plugin)) throw new VError(`${plugin} is not a constructor`)
-    return new plugin(this.server, this) as IPlugin
+    return new plugin(this.server, this) as MinecraftProxyPlugin
   }
 }
