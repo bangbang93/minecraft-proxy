@@ -20,7 +20,7 @@ export class PluginHook {
   public readonly hooks = Object.freeze({
     server: {
       lookupBackend: new AsyncSeriesBailHook<[string], IBackend>(['serverName']),
-      prePipeToBackend: new AsyncParallelHook<[Client, Backend]>(),
+      prePipeToBackend: new AsyncParallelHook<[Client, Backend]>(['client', 'backend']),
     },
   })
 
@@ -50,6 +50,7 @@ export class PluginHook {
           name = `${pluginPackage}:${name}`
         }
         this.plugins.set(name, instance)
+        this.logger.info(`loaded plugin ${name}`)
       } catch (e) {
         throw new VError({
           cause: e,
