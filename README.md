@@ -87,3 +87,6 @@ mcproxy支持无中断重载，通过向master进程发送SIGUSR1信号即可实
 
 ## bungeecord模式
 找到spigot.yml，修改settings.bungeecord为true，重启服务器即可
+
+## Roadmap
+- [] 插件机制(WIP)
