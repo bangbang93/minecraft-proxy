@@ -1,12 +1,12 @@
 import {plainToClass, Transform, Type} from 'class-transformer'
 import {
-  IsArray,
-  IsBoolean, IsInstance, IsInt, IsOptional, IsString, IsUrl, Max, Min, ValidateIf, ValidateNested, validateOrReject,
+  IsArray, IsBoolean, IsInstance, IsInt, IsOptional, IsString, IsUrl, Max, Min, validate, ValidateIf, ValidateNested,
 } from 'class-validator'
 import * as IPCIDR from 'ip-cidr'
 import {castArray} from 'lodash'
 import {cpus} from 'os'
 import {join} from 'path'
+import {inspect} from 'util'
 import * as yimp from 'yaml-import'
 
 class ConfigProxy {
@@ -61,6 +61,9 @@ export class Config {
 export async function loadConfig(path = join(__dirname, '../config/config.yml')): Promise<Config> {
   const data = yimp.read(path, {safe: false})
   const config = plainToClass(Config, data, {enableImplicitConversion: true})
-  await validateOrReject(config)
-  return config
+  const errors = await validate(config)
+  if (!errors) return config
+  // eslint-disable-next-line no-console
+  console.error(inspect(errors, {depth: 1e5}))
+  process.exit(1)
 }
