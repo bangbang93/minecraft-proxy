@@ -1,10 +1,11 @@
+import {join} from 'path'
 import 'reflect-metadata'
 import {Container} from 'typedi'
 import {Config, loadConfig} from './config'
 import {ProxyServer} from './proxy-server'
 
 export async function bootstrap(): Promise<void> {
-  const config = await loadConfig()
+  const config = await loadConfig(join(process.cwd(), '../config/config.yml'))
   Container.set('config', config)
   Container.set(Config, config)
 

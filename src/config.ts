@@ -5,7 +5,6 @@ import {
 import * as IPCIDR from 'ip-cidr'
 import {castArray} from 'lodash'
 import {cpus} from 'os'
-import {join} from 'path'
 import {inspect} from 'util'
 import * as yimp from 'yaml-import'
 
@@ -58,7 +57,7 @@ export class Config {
   @IsOptional() @IsArray() @IsString({each: true}) plugins: string[] = []
 }
 
-export async function loadConfig(path = join(__dirname, '../config/config.yml')): Promise<Config> {
+export async function loadConfig(path: string): Promise<Config> {
   const data = yimp.read(path, {safe: false})
   const config = plainToClass(Config, data, {enableImplicitConversion: true})
   const errors = await validate(config)
