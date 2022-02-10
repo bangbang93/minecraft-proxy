@@ -9,7 +9,8 @@
     "build": "tsc",
     "test": "true",
     "dev": "ts-node src/main.ts",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "pkg": "npm run build && pkg . -C Gzip"
   },
   "repository": {
     "type": "git",
@@ -59,5 +60,13 @@
     "typedi": "^0.8.0",
     "verror": "^1.10.1",
     "yaml-import": "^2.0.0"
+  },
+  "pkg": {
+    "outputPath": "pkg",
+    "targets": [
+      "linuxstatic",
+      "macos",
+      "windows"
+    ]
   }
 }

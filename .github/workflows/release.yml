@@ -43,3 +43,11 @@ jobs:
         asset_path: minecraft-proxy.tar.gz
         asset_name: minecraft-proxy.tar.gz
         asset_content_type: application/gzip
+    - run: npm run pkg
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        prerelease: false
+        files: |
+          pkg/**
+
