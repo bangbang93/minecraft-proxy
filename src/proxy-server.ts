@@ -82,7 +82,9 @@ export class ProxyServer extends EventEmitter {
       const nextState = await client.awaitHandshake()
       const backend = await this.getBackend(client.host)
       if (!backend) return client.close(`${client.host} not found`)
-      if (nextState === 2 || !backend.handlePing) {
+      if (nextState !== 2 && backend.handlePing) {
+        await client.responsePing(backend)
+      } else {
         if (nextState === 2) {
           if (client.username && this.isUsernameBanned(client.username)) {
             this.logger.warn({
@@ -100,8 +102,6 @@ export class ProxyServer extends EventEmitter {
           }
         }
         await client.pipeToBackend(backend, nextState)
-      } else {
-        await client.responsePing(backend)
       }
     } catch (err) {
       this.logger.error(err)

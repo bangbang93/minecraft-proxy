@@ -7,8 +7,10 @@ import {createDeserializer, createSerializer, states, States} from 'minecraft-pr
 import * as framing from 'minecraft-protocol/src/transforms/framing'
 import {connect, Socket} from 'net'
 import {Duplex} from 'stream'
+import {Container} from 'typedi'
 import {Backend} from './backend'
 import {Config} from './config'
+import {MinecraftData} from './minecraft-data'
 import {ProxyServer} from './proxy-server'
 
 export class Client extends EventEmitter {
@@ -27,6 +29,7 @@ export class Client extends EventEmitter {
   private logger = createLogger({name: 'client'})
   private readonly config: Config
   private _closed: boolean
+  private readonly minecraftData = Container.get(MinecraftData)
 
   constructor(
     private readonly socket: Socket,
@@ -74,6 +77,7 @@ export class Client extends EventEmitter {
       switch (name) {
         case 'set_protocol':
           this.protocolVersion = params.protocolVersion
+          this.version = this.minecraftData.protocolVersionToMcVersion(this.protocolVersion) ?? this.version
           this.host = params.serverHost
           if (this.host.includes('\0')) {
             const split = this.host.split('\0')

@@ -61,7 +61,7 @@ export async function loadConfig(path: string): Promise<Config> {
   const data = yimp.read(path, {safe: false})
   const config = plainToClass(Config, data, {enableImplicitConversion: true})
   const errors = await validate(config)
-  if (!errors) return config
+  if (errors.length === 0) return config
   // eslint-disable-next-line no-console
   console.error(inspect(errors, {depth: 1e5}))
   process.exit(1)
