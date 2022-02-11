@@ -6,6 +6,7 @@ import {Container} from 'typedi'
 import {Backend, IBackend} from './backend'
 import {Client} from './client'
 import {Config} from './config'
+import {EnumHandShakeState} from './constants'
 import {PluginHook} from './plugin-hook'
 
 export class ProxyServer extends EventEmitter {
@@ -82,10 +83,10 @@ export class ProxyServer extends EventEmitter {
       const nextState = await client.awaitHandshake()
       const backend = await this.getBackend(client.host)
       if (!backend) return client.close(`${client.host} not found`)
-      if (nextState !== 2 && backend.handlePing) {
+      if (nextState !== EnumHandShakeState.login && backend.handlePing) {
         await client.responsePing(backend)
       } else {
-        if (nextState === 2) {
+        if (nextState === EnumHandShakeState.login) {
           if (client.username && this.isUsernameBanned(client.username)) {
             this.logger.warn({
               ip: socket.remoteAddress, username: client.username,
