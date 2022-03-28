@@ -11,7 +11,7 @@ const workers = new Map()
 const Logger = createLogger({name: cluster.isMaster ? 'master' : `worker ${cluster.worker.id}`})
 
 async function main() {
-  const config = await loadConfig()
+  const config = await loadConfig(process.cwd(), 'config/config.yml')
 
   if (cluster.isMaster) {
     process.title = 'mc-proxy: master process'
