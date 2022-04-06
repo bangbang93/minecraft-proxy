@@ -5,13 +5,14 @@ const cluster = require('cluster')
 const {loadConfig} = require('../dist/config')
 const {masterOnClusterMessage} = require('../dist/cluster')
 const {createLogger} = require('bunyan')
+const {join} = require('path')
 
 const workers = new Map()
 
 const Logger = createLogger({name: cluster.isMaster ? 'master' : `worker ${cluster.worker.id}`})
 
 async function main() {
-  const config = await loadConfig(process.cwd(), 'config/config.yml')
+  const config = await loadConfig(join(process.cwd(), 'config/config.yml'))
 
   if (cluster.isMaster) {
     process.title = 'mc-proxy: master process'
