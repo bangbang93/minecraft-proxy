@@ -3,6 +3,12 @@ proxy:
   host: 0.0.0.0
   workers: 0
 defaultServer: localhost
+allowListOnly: false
+allowList:
+  ips: ["0.0.0.0/0"]
+  usernames: 
+    - CN_NKXingCh
+  uuids: []
 blockList:
   ips: !!import/single block-ip.yml
   usernames:
@@ -15,3 +21,6 @@ servers:
 profileEndpoint: https://api.mojang.com/profiles/minecraft
 plugins:
 #  - test
+message:
+  bannedUsername: "未授权用户"
+  bannedUUID: "未授权用户"
