@@ -6,7 +6,7 @@ COPY package-lock.json package.json tsconfig.json ./
 RUN npm ci
 COPY src ./src
 RUN npm run build
-RUN rm -rf node_modules && npm ci --prod
+RUN npm prune --omit=dev
 
 FROM node:alpine AS RUNTIME
 WORKDIR /opt/minecraft-proxy
