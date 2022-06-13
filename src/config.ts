@@ -46,6 +46,11 @@ class BlockList {
   public uuids: string[] = []
 }
 
+class Messages {
+  @IsOptional() @IsString() public bannedUsername: string = "未授权用户"
+  @IsOptional() @IsString() public bannedUUID: string = "未授权用户"
+}
+
 export class Config {
   @ValidateNested() proxy: ConfigProxy
   @ValidateNested({each: true}) @Type(() => ConfigServer) servers: ConfigServer[]
@@ -55,6 +60,7 @@ export class Config {
   @IsOptional() @ValidateNested() public allowList: BlockList
   @IsUrl({protocols: ['http', 'https']}) profileEndpoint = 'https://api.mojang.com/profiles/minecraft'
   @IsOptional() @IsArray() @IsString({each: true}) plugins: string[] = []
+  @ValidateNested() message: Messages
 }
 
 export async function loadConfig(path: string): Promise<Config> {

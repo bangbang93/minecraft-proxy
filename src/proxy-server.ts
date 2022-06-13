@@ -1,13 +1,13 @@
 import * as Logger from 'bunyan'
-import {isWorker, worker} from 'cluster'
-import {EventEmitter} from 'events'
-import {createServer, Server, Socket} from 'net'
-import {Container} from 'typedi'
-import {Backend, IBackend} from './backend'
-import {Client} from './client'
-import {Config} from './config'
-import {EnumHandShakeState} from './constants'
-import {PluginHook} from './plugin-hook'
+import { isWorker, worker } from 'cluster'
+import { EventEmitter } from 'events'
+import { createServer, Server, Socket } from 'net'
+import { Container } from 'typedi'
+import { Backend, IBackend } from './backend'
+import { Client } from './client'
+import { Config } from './config'
+import { EnumHandShakeState } from './constants'
+import { PluginHook } from './plugin-hook'
 
 export class ProxyServer extends EventEmitter {
   public clients: Set<Client> = new Set()
@@ -26,7 +26,7 @@ export class ProxyServer extends EventEmitter {
     private host?: string,
   ) {
     super()
-    const loggerOptions: Logger.LoggerOptions = {name: 'server', port, host}
+    const loggerOptions: Logger.LoggerOptions = { name: 'server', port, host }
     if (isWorker) {
       loggerOptions.worker = worker.id
     }
@@ -70,14 +70,14 @@ export class ProxyServer extends EventEmitter {
   private async onConnection(socket: Socket): Promise<void> {
     if (this.isIpBanned(socket.remoteAddress)) {
       socket.end()
-      this.logger.warn({ip: socket.remoteAddress}, `block ip ${socket.remoteAddress}`)
+      this.logger.warn({ ip: socket.remoteAddress }, `block ip ${socket.remoteAddress}`)
       return
     }
     const client = new Client(socket, this)
     this.clients.add(client)
     socket.once('disconnect', () => this.onDisconnect(client))
     socket.on('error', (err) => {
-      this.logger.error({err})
+      this.logger.error({ err })
     })
     try {
       const nextState = await client.awaitHandshake()
@@ -91,14 +91,14 @@ export class ProxyServer extends EventEmitter {
             this.logger.warn({
               ip: socket.remoteAddress, username: client.username,
             }, `block username ${client.username}`)
-            client.close('username banned')
+            client.close(this.config.message.bannedUsername)
             return
           }
-          if (backend.onlineMode && this.isUuidBanned(await client.getUUID(backend))) {
+          if (!this.config.allowListOnly && backend.onlineMode && this.isUuidBanned(await client.getUUID(backend))) {
             this.logger.warn({
               ip: socket.remoteAddress, username: client.username, uuid: await client.getUUID(backend),
             }, `block uuid ${await client.getUUID(backend)}`)
-            client.close('uuid banned')
+            client.close(this.config.message.bannedUUID)
             return
           }
         }
