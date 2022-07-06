@@ -1,6 +1,6 @@
 {
   "name": "minecraft-proxy",
-  "version": "1.4.7",
+  "version": "1.4.8-0",
   "description": "ProxyPass minecraft",
   "exports": "./dist/index.js",
   "main": "dist/index.js",
