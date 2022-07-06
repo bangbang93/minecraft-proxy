@@ -5,6 +5,7 @@
   "exports": "./dist/index.js",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
+  "bin": "bin/mcproxy",
   "scripts": {
     "build": "tsc",
     "test": "true",
@@ -65,9 +66,9 @@
   "pkg": {
     "outputPath": "pkg",
     "targets": [
-      "linuxstatic",
-      "macos",
-      "windows"
+      "node16-linuxstatic",
+      "node16-macos",
+      "node16-windows"
     ]
   }
 }
