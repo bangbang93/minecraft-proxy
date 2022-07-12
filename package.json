@@ -11,7 +11,8 @@
     "test": "true",
     "dev": "ts-node src/main.ts",
     "prepublishOnly": "npm run build",
-    "pkg": "npm run build && pkg . -C Gzip"
+    "pkg": "npm run build && pkg . -C Gzip",
+    "lint": "eslint --ext .js,.ts ."
   },
   "repository": {
     "type": "git",
