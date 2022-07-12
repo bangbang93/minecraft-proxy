@@ -13,6 +13,7 @@ import {Backend} from './backend'
 import {Config} from './config'
 import {MinecraftData} from './minecraft-data'
 import {ProxyServer} from './proxy-server'
+import ms = require('ms')
 
 export class Client extends EventEmitter {
   public host: string
@@ -205,7 +206,12 @@ export class Client extends EventEmitter {
     } else {
       const resp = await got<{id: string; name: string}[]>(
         this.config.profileEndpoint,
-        {method: 'POST', responseType: 'json', body: JSON.stringify([this.username])},
+        {
+          method: 'POST',
+          responseType: 'json',
+          body: JSON.stringify([this.username]),
+          timeout: ms('10s'),
+        },
       )
       if (resp.body.length > 0) {
         this._uuid = resp.body[0].id
