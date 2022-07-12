@@ -47,8 +47,8 @@ class BlockList {
 }
 
 class Messages {
-  @IsOptional() @IsString() public bannedUsername: string = "未授权用户"
-  @IsOptional() @IsString() public bannedUUID: string = "未授权用户"
+  @IsOptional() @IsString() public bannedUsername: string = '未授权用户'
+  @IsOptional() @IsString() public bannedUUID: string = '未授权用户'
 }
 
 export class Config {

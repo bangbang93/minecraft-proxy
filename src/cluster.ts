@@ -4,7 +4,7 @@ import {sum} from 'lodash'
 import {Container, Inject, Service} from 'typedi'
 import {ProxyServer} from './proxy-server'
 
-const handlers = new Map<number, Function>()
+const handlers = new Map<number, (...args: unknown[]) => unknown>()
 
 interface IClusterRpc {
   getOnline(name: string): Promise<number>
