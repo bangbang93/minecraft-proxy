@@ -7,6 +7,7 @@ import {pick} from 'lodash'
 import {createDeserializer, createSerializer, states, States} from 'minecraft-protocol'
 import * as framing from 'minecraft-protocol/src/transforms/framing'
 import {AddressInfo, connect, Socket} from 'net'
+import pTimeout from 'p-timeout'
 import {Duplex} from 'stream'
 import {Container} from 'typedi'
 import {Backend} from './backend'
@@ -110,8 +111,12 @@ export class Client extends EventEmitter {
     await this.proxy.plugin.hooks.server.prePipeToBackend.promise(this, backend)
     if (this.closed) return
 
-    const socket = connect(backend.port, backend.host)
-    await once(socket, 'connect')
+    const socket = await pTimeout((async () => {
+      const socket = connect(backend.port, backend.host)
+      await once(socket, 'connect')
+      return socket
+    })(), ms('10s'))
+
     backend.addClient(this)
     if (backend.useProxy) {
       socket.write(
