@@ -1,3 +1,4 @@
+import is from '@sindresorhus/is'
 import {createLogger} from 'bunyan'
 import {createHash} from 'crypto'
 import {EventEmitter, once} from 'events'
@@ -5,7 +6,7 @@ import got from 'got'
 import {pick} from 'lodash'
 import {createDeserializer, createSerializer, states, States} from 'minecraft-protocol'
 import * as framing from 'minecraft-protocol/src/transforms/framing'
-import {connect, Socket} from 'net'
+import {AddressInfo, connect, Socket} from 'net'
 import {Duplex} from 'stream'
 import {Container} from 'typedi'
 import {Backend} from './backend'
@@ -219,7 +220,7 @@ export class Client extends EventEmitter {
     try {
       this.write('disconnect', {reason: JSON.stringify({text: reason})})
       this._closed = true
-      this.logger.info(`force disconnecting ${this.socket.address()}, reason: ${reason}`)
+      this.logger.info(`force disconnecting ${addressToString(this.socket.address())}, reason: ${reason}`)
     } catch (err) {
       this.logger.warn(err, 'failed to disconnect')
       this.kill()
@@ -233,4 +234,9 @@ export class Client extends EventEmitter {
   public write(name, params): void {
     this.serializer.write({name, params})
   }
+}
+
+function addressToString(address: AddressInfo | string): string {
+  if (is.string(address)) return address
+  return `${address.address}:${address.port}`
 }
