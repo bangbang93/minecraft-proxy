@@ -1,4 +1,3 @@
-import is from '@sindresorhus/is'
 import {createLogger} from 'bunyan'
 import {createHash} from 'crypto'
 import {EventEmitter, once} from 'events'
@@ -6,7 +5,7 @@ import got from 'got'
 import {pick} from 'lodash'
 import {createDeserializer, createSerializer, states, States} from 'minecraft-protocol'
 import * as framing from 'minecraft-protocol/src/transforms/framing'
-import {AddressInfo, connect, Socket} from 'net'
+import {connect, Socket} from 'net'
 import pTimeout from 'p-timeout'
 import {Duplex} from 'stream'
 import {Container} from 'typedi'
@@ -14,7 +13,6 @@ import {Backend} from './backend'
 import {Config} from './config'
 import {MinecraftData} from './minecraft-data'
 import {ProxyServer} from './proxy-server'
-import {getLoglevel} from './util'
 import ms = require('ms')
 
 export class Client extends EventEmitter {
@@ -30,7 +28,7 @@ export class Client extends EventEmitter {
   private framer: Duplex = framing.createFramer()
   private deserializer
   private serializer
-  private logger = createLogger({name: 'client', level: getLoglevel()})
+  private logger = createLogger({name: 'client'})
   private readonly config: Config
   private _closed: boolean
   private readonly minecraftData = Container.get(MinecraftData)
@@ -45,6 +43,7 @@ export class Client extends EventEmitter {
     })
     Object.assign(this.logger.fields, pick(socket, 'remoteAddress', 'remotePort'))
     this.config = proxy.config
+    this.logger.level(this.config.loglevel)
   }
 
   public get closed(): boolean {

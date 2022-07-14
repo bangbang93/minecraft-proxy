@@ -1,6 +1,8 @@
+import {LogLevel} from 'bunyan'
 import {plainToClass, Transform, Type} from 'class-transformer'
 import {
-  IsArray, IsBoolean, IsInstance, IsInt, IsOptional, IsString, IsUrl, Max, Min, validate, ValidateIf, ValidateNested,
+  IsArray, IsBoolean, IsIn, IsInstance, IsInt, IsOptional, IsString, IsUrl, Max, Min, validate, ValidateIf,
+  ValidateNested,
 } from 'class-validator'
 import * as IPCIDR from 'ip-cidr'
 import {castArray} from 'lodash'
@@ -61,6 +63,7 @@ export class Config {
   @IsUrl({protocols: ['http', 'https']}) profileEndpoint = 'https://api.mojang.com/profiles/minecraft'
   @IsOptional() @IsArray() @IsString({each: true}) plugins: string[] = []
   @ValidateNested() message: Messages
+  @IsIn(['trace', 'debug', 'info', 'warn', 'error', 'fatal']) @IsOptional() loglevel: LogLevel = 'info'
 }
 
 export async function loadConfig(path: string): Promise<Config> {
