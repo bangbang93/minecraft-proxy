@@ -101,7 +101,8 @@ export class Client extends EventEmitter {
           this.username = params.username
           this.logger.fields['username'] = this.username
           return 2
-        // no default
+        default:
+          throw new Error(`unexpected packet ${name}`)
       }
     }
   }
