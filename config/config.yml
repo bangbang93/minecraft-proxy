@@ -6,7 +6,7 @@ defaultServer: localhost
 allowListOnly: false
 allowList:
   ips: ["0.0.0.0/0"]
-  usernames: 
+  usernames:
     - CN_NKXingCh
   uuids: []
 blockList:
@@ -24,3 +24,4 @@ plugins:
 message:
   bannedUsername: "未授权用户"
   bannedUUID: "未授权用户"
+loglevel: info # 'trace', 'debug', 'info', 'warn', 'error', 'fatal'
