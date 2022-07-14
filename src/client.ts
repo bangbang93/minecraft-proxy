@@ -11,6 +11,7 @@ import {Duplex} from 'stream'
 import {Container} from 'typedi'
 import {Backend} from './backend'
 import {Config} from './config'
+import {IPacket} from './constants'
 import {MinecraftData} from './minecraft-data'
 import {ProxyServer} from './proxy-server'
 import ms = require('ms')
@@ -75,9 +76,9 @@ export class Client extends EventEmitter {
     if (this.host) return
     this.state = states.HANDSHAKING
     for await (const chunk of this.splitter) {
-      const packet = this.deserializer.parsePacketBuffer(chunk)
+      const packet: IPacket = this.deserializer.parsePacketBuffer(chunk)
       const {name, params} = packet.data
-      this.logger.trace({packet, state: this.state})
+      this.logger.trace({packetData: packet.data, state: this.state})
       switch (name) {
         case 'set_protocol':
           this.protocolVersion = params.protocolVersion
