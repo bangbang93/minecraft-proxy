@@ -111,12 +111,21 @@ export class Client extends EventEmitter {
     this.socket.unpipe()
     await this.proxy.plugin.hooks.server.prePipeToBackend.promise(this, backend)
     if (this.closed) return
+    Object.assign(this.logger.fields, {backend: pick(backend, 'host', 'port'), username: this.username})
 
     const socket = await pTimeout((async () => {
       const socket = connect(backend.port, backend.host)
       await once(socket, 'connect')
       return socket
-    })(), ms('10s'))
+    })(), ms('10s'), 'connect to backend timed out')
+
+    socket.on('close', () => {
+      backend.removeClient(this)
+    })
+    socket.on('error', (err) => {
+      this.logger.error({err})
+      this.close(`failed to connect backend: ${err.message}`)
+    })
 
     backend.addClient(this)
     if (backend.useProxy) {
@@ -159,14 +168,6 @@ export class Client extends EventEmitter {
     }
     this.socket.pipe(socket)
     socket.pipe(this.socket)
-
-    socket.on('close', () => {
-      backend.removeClient(this)
-    })
-    socket.on('error', (err) => {
-      this.logger.error({err})
-      this.close(`failed to connect backend: ${err.message}`)
-    })
 
     return socket
   }
