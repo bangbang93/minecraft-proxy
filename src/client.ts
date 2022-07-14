@@ -133,6 +133,7 @@ export class Client extends EventEmitter {
     socket.on('error', (err) => {
       this.logger.error({err})
       this.close(`failed to connect backend: ${err.message}`)
+      backend.removeClient(this)
     })
 
     backend.addClient(this)
