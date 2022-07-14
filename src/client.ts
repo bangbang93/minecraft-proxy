@@ -9,6 +9,7 @@ import {connect, Socket} from 'net'
 import pTimeout from 'p-timeout'
 import {Duplex} from 'stream'
 import {Container} from 'typedi'
+import {VError} from 'verror'
 import {Backend} from './backend'
 import {Config} from './config'
 import {IPacket} from './constants'
@@ -77,7 +78,6 @@ export class Client extends EventEmitter {
   }
 
   public async awaitHandshake(): Promise<number> {
-    if (this.host) return
     this.state = states.HANDSHAKING
     for await (const chunk of this.splitter) {
       const packet: IPacket = this.deserializer.parsePacketBuffer(chunk)
@@ -108,7 +108,9 @@ export class Client extends EventEmitter {
           this.logger.fields['username'] = this.username
           return 2
         default:
-          throw new Error(`unexpected packet ${name}`)
+          throw new VError({
+            info: packet,
+          }, `unexpected packet ${name}`)
       }
     }
   }
