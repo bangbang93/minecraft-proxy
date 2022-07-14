@@ -51,6 +51,10 @@ export class Client extends EventEmitter {
     return this._closed
   }
 
+  public get remoteAddress(): string {
+    return `${this.socket.remoteAddress}:${this.socket.remotePort}`
+  }
+
   public get state(): States {
     return this._state
   }
@@ -175,6 +179,7 @@ export class Client extends EventEmitter {
   }
 
   public async responsePing(backend: Backend): Promise<void> {
+    this.logger.trace('response ping')
     const response = JSON.stringify({
       version: {
         name: backend.version,

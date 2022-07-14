@@ -1,6 +1,7 @@
 import * as Logger from 'bunyan'
 import {isWorker, worker} from 'cluster'
 import {EventEmitter} from 'events'
+import {pick} from 'lodash'
 import {createServer, Server, Socket} from 'net'
 import {Container} from 'typedi'
 import {Backend, IBackend} from './backend'
@@ -26,7 +27,7 @@ export class ProxyServer extends EventEmitter {
     private host?: string,
   ) {
     super()
-    const loggerOptions: Logger.LoggerOptions = {name: 'server', port, host}
+    const loggerOptions: Logger.LoggerOptions = {name: 'server', port, host, level: this.config.loglevel}
     if (isWorker) {
       loggerOptions.worker = worker.id
     }
@@ -81,12 +82,17 @@ export class ProxyServer extends EventEmitter {
     })
     try {
       const nextState = await client.awaitHandshake()
+      this.logger.debug({nextState}, 'handshake success')
       const backend = await this.getBackend(client.host)
       if (!backend) return client.close(`${client.host} not found`)
-      if (nextState !== EnumHandShakeState.login && backend.handlePing) {
-        await client.responsePing(backend)
-      } else {
-        if (nextState === EnumHandShakeState.login) {
+      switch (nextState) {
+        case EnumHandShakeState.status:
+          if (backend.handlePing) {
+            await client.responsePing(backend)
+            client.kill()
+          }
+          break
+        case EnumHandShakeState.login:
           if (client.username && this.isUsernameBanned(client.username)) {
             this.logger.warn({
               ip: socket.remoteAddress, username: client.username,
@@ -101,9 +107,13 @@ export class ProxyServer extends EventEmitter {
             client.close(this.config.message.bannedUUID)
             return
           }
-        }
-        await client.pipeToBackend(backend, nextState)
+          break
+        default:
+          this.logger.warn({client: pick(client, 'remoteAddress')}, `unknown handshake state ${nextState}`)
+          client.close(`unknown handshake state ${nextState}`)
       }
+
+      await client.pipeToBackend(backend, nextState)
     } catch (err) {
       this.logger.error(err)
       client.close(err.message)
