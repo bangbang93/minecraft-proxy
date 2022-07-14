@@ -1,6 +1,7 @@
 import * as Bluebird from 'bluebird'
 import {isWorker, worker, Worker, workers} from 'cluster'
 import {sum} from 'lodash'
+import * as pMap from 'p-map'
 import {Container, Inject, Service} from 'typedi'
 import {ProxyServer} from './proxy-server'
 
@@ -46,7 +47,7 @@ export class ClusterRequest implements IClusterRpc {
 @Service()
 export class ClusterProxy implements IClusterRpc {
   public async getOnline(name: string): Promise<number> {
-    const data = await Bluebird.map(Object.values(workers), async (worker) => {
+    const data = await pMap(Object.values(workers), async (worker) => {
       const correlationId = Math.random()
       worker.send({
         type: 'rpc-request',

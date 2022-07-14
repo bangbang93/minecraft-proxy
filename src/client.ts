@@ -233,7 +233,7 @@ export class Client extends EventEmitter {
     try {
       this.write('disconnect', {reason: JSON.stringify({text: reason})})
       this._closed = true
-      this.logger.info(`force disconnecting ${addressToString(this.socket.address())}, reason: ${reason}`)
+      this.logger.info(`force disconnecting ${this.socket.remoteAddress}:${this.socket.remotePort}, reason: ${reason}`)
     } catch (err) {
       this.logger.warn(err, 'failed to disconnect')
       this.kill()
@@ -247,9 +247,4 @@ export class Client extends EventEmitter {
   public write(name, params): void {
     this.serializer.write({name, params})
   }
-}
-
-function addressToString(address: AddressInfo | string): string {
-  if (is.string(address)) return address
-  return `${address.address}:${address.port}`
 }
