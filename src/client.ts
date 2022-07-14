@@ -14,6 +14,7 @@ import {Backend} from './backend'
 import {Config} from './config'
 import {MinecraftData} from './minecraft-data'
 import {ProxyServer} from './proxy-server'
+import {getLoglevel} from './util'
 import ms = require('ms')
 
 export class Client extends EventEmitter {
@@ -29,7 +30,7 @@ export class Client extends EventEmitter {
   private framer: Duplex = framing.createFramer()
   private deserializer
   private serializer
-  private logger = createLogger({name: 'client'})
+  private logger = createLogger({name: 'client', level: getLoglevel()})
   private readonly config: Config
   private _closed: boolean
   private readonly minecraftData = Container.get(MinecraftData)
@@ -77,6 +78,7 @@ export class Client extends EventEmitter {
     for await (const chunk of this.splitter) {
       const packet = this.deserializer.parsePacketBuffer(chunk)
       const {name, params} = packet.data
+      this.logger.trace({packet, state: this.state})
       switch (name) {
         case 'set_protocol':
           this.protocolVersion = params.protocolVersion
@@ -233,7 +235,13 @@ export class Client extends EventEmitter {
     try {
       this.write('disconnect', {reason: JSON.stringify({text: reason})})
       this._closed = true
-      this.logger.info(`force disconnecting ${this.socket.remoteAddress}:${this.socket.remotePort}, reason: ${reason}`)
+      this.logger.info(`force disconnecting, reason: ${reason}`)
+      setTimeout(() => {
+        if (this.socket.connecting) {
+          this.logger.warn('killing connection')
+          this.kill()
+        }
+      }, ms('5s'))
     } catch (err) {
       this.logger.warn(err, 'failed to disconnect')
       this.kill()
