@@ -10,12 +10,13 @@ export class MinecraftData {
     const res = preNettyVersionsByProtocolVersion.pc[protocolVersion]
         ?? postNettyVersionsByProtocolVersion.pc[protocolVersion]
     // minecraft-data的typings这里是错的，会返回数组
+    let minecraftVersion: string
     if (Array.isArray(res)) {
-      return res[0].minecraftVersion
+      minecraftVersion = res[0]?.minecraftVersion
     } else {
-      return res.minecraftVersion
+      minecraftVersion = res.minecraftVersion
     }
-    if (!res) {
+    if (!minecraftVersion) {
       this.logger.warn('unknown protocol version: %d', protocolVersion)
     }
     return null
