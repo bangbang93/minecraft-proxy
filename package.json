@@ -57,7 +57,7 @@
     "ip-cidr": "^2.0.6",
     "lodash": "^4.17.15",
     "minecraft-data": "^3.33.0",
-    "minecraft-protocol": "^1.41.2",
+    "minecraft-protocol": "^1.43.1",
     "ms": "^2.1.3",
     "p-map": "^4.0.0",
     "p-timeout": "^4.1.0",
