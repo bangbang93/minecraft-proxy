@@ -1,6 +1,6 @@
 FROM node:22-bookworm AS BUILD
-RUN apk update && \
-  apk add build-base python3
+RUN apt-get update && \
+  apt-get install python3
 WORKDIR /opt/minecraft-proxy
 COPY package-lock.json package.json tsconfig.json ./
 RUN npm ci
