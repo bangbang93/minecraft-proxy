@@ -53,7 +53,7 @@
     "class-validator": "^0.14.0",
     "eventemitter2": "^6.4.4",
     "globby": "^11.0.3",
-    "got": "^11.8.5",
+    "got": "^14.6.6",
     "ip-cidr": "^2.0.6",
     "lodash": "^4.17.15",
     "minecraft-data": "^3.33.0",
