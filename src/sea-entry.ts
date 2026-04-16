@@ -12,6 +12,7 @@ import {
 } from './worker-cluster'
 import {createLogger} from 'bunyan'
 
+// Keep worker IDs monotonic to avoid ID reuse races across reloads.
 let workerCounter = 0
 const intentionallyStoppedWorkers = new Set<number>()
 const configPath = join(process.cwd(), 'config/config.yml')
@@ -62,6 +63,7 @@ function startWorker(): void {
 
   wrapper.on('message', (data) => {
     void masterOnClusterMessage(wrapper, data)
+      .catch((err) => Logger.error({err, workerId}, 'failed to handle cluster message'))
   })
 }
 
@@ -78,15 +80,15 @@ function setupMaster(): void {
   process.on('SIGUSR1', async () => {
     try {
       Logger.info('got SIGUSR1, reloading')
-      const config = await loadConfig(configPath)
+      const reloadedConfig = await loadConfig(configPath)
+      const currentWorkers = Array.from(workers.entries())
 
-      for (const [id, worker] of workers) {
+      for (const [id, worker] of currentWorkers) {
         intentionallyStoppedWorkers.add(id)
         worker.disconnect()
-        removeWorker(id)
       }
 
-      for (let i = 0; i < config.proxy.workers; i++) {
+      for (let i = 0; i < reloadedConfig.proxy.workers; i++) {
         startWorker()
       }
     } catch (err) {

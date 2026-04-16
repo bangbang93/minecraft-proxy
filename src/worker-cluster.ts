@@ -51,7 +51,12 @@ class WorkerThreadWrapper extends EventEmitter implements WorkerLike {
   }
 
   disconnect(): void {
-    this.worker.postMessage({type: 'shutdown'} as WorkerShutdownMessage)
+    try {
+      this.worker.postMessage({type: 'shutdown'} as WorkerShutdownMessage)
+    } catch {
+      void this.worker.terminate()
+      return
+    }
     this.terminateTimeout = setTimeout(() => {
       void this.worker.terminate()
     }, WORKER_TERMINATE_TIMEOUT_MS)
