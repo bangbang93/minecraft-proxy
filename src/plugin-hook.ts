@@ -10,6 +10,15 @@ import {Client} from './client'
 import {Config} from './config'
 import {ProxyServer} from './proxy-server'
 
+function isSea(): boolean {
+  try {
+    const sea = require('node:sea')
+    return sea.isSea()
+  } catch {
+    return false
+  }
+}
+
 export abstract class MinecraftProxyPlugin {
   abstract name: string
   protected constructor(
@@ -36,6 +45,13 @@ export class PluginHook {
   ) {}
 
   public async loadPlugin(): Promise<void> {
+    if (isSea()) {
+      if (!isEmpty(this.config.plugins)) {
+        this.logger.warn('Plugins are not supported in SEA mode. Skipping plugin loading.')
+      }
+      return
+    }
+
     if (isEmpty(this.config.plugins)) return
     for (const pluginPackage of this.config.plugins) {
       try {

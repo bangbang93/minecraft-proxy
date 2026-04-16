@@ -1,13 +1,11 @@
-#!/usr/bin/env node
-require('reflect-metadata')
-require('source-map-support/register')
-
-const { isMainThread, Worker, threadId } = require('worker_threads')
-const { join } = require('path')
-const { loadConfig } = require('../dist/config')
-const { masterOnClusterMessage } = require('../dist/cluster')
-const { createWorkerWrapper, removeWorker } = require('../dist/worker-cluster')
-const { createLogger } = require('bunyan')
+import 'reflect-metadata'
+import 'source-map-support/register'
+import { isMainThread, Worker as NodeWorker, threadId } from 'worker_threads'
+import { join } from 'path'
+import { loadConfig } from './config'
+import { masterOnClusterMessage } from './cluster'
+import { createWorkerWrapper, removeWorker, workers } from './worker-cluster'
+import { createLogger } from 'bunyan'
 
 let workerCounter = 0
 
@@ -15,7 +13,7 @@ const Logger = createLogger({
   name: isMainThread ? 'master' : `worker ${threadId}`
 })
 
-async function main() {
+async function main(): Promise<void> {
   const config = await loadConfig(join(process.cwd(), 'config/config.yml'))
 
   if (isMainThread) {
@@ -27,7 +25,7 @@ async function main() {
     Logger.info('all workers started')
   } else {
     setupWorker(threadId)
-    const { bootstrap } = require('../dist/main')
+    const { bootstrap } = await import('./main')
     bootstrap()
       .catch((err) => {
         console.error(err)
@@ -36,9 +34,9 @@ async function main() {
   }
 }
 
-function startWorker() {
+function startWorker(): void {
   const workerId = ++workerCounter
-  const worker = new Worker(__filename)
+  const worker = new NodeWorker(__filename)
   const wrapper = createWorkerWrapper(worker, workerId)
 
   worker.on('exit', (code) => {
@@ -54,7 +52,7 @@ function startWorker() {
   })
 }
 
-function setupWorker(workerId) {
+function setupWorker(workerId: number): void {
   process.title = `mc-proxy: worker ${workerId}`
   process.on('disconnect', () => {
     Logger.info('disconnect from master')
@@ -62,11 +60,11 @@ function setupWorker(workerId) {
   })
 }
 
-function setupMaster(config) {
+function setupMaster(config: { proxy: { workers: number } }): void {
   process.on('SIGUSR1', async () => {
     Logger.info('got SIGUSR1, reloading')
 
-    for (const [id, worker] of require('../dist/worker-cluster').workers) {
+    for (const [id, worker] of workers) {
       worker.disconnect()
       removeWorker(id)
     }

@@ -8,10 +8,10 @@
   "bin": "bin/mcproxy",
   "scripts": {
     "build": "tsc",
+    "build:sea": "node scripts/build-sea.js",
     "test": "true",
     "dev": "ts-node src/main.ts",
     "prepublishOnly": "npm run build",
-    "pkg": "npm run build && pkg . -C Gzip",
     "lint": "eslint --ext .js,.ts ."
   },
   "repository": {
@@ -40,8 +40,8 @@
     "@types/verror": "^1.10.5",
     "@typescript-eslint/eslint-plugin": "^5.10.1",
     "@typescript-eslint/parser": "^5.10.1",
+    "esbuild": "^0.28.0",
     "eslint": "^8.7.0",
-    "pkg": "^5.7.0",
     "ts-node": "^8.6.2",
     "typescript": "^4.4.2"
   },
@@ -67,13 +67,5 @@
     "typedi": "^0.8.0",
     "verror": "^1.10.1",
     "yaml-import": "^2.0.0"
-  },
-  "pkg": {
-    "outputPath": "pkg",
-    "targets": [
-      "node16-linuxstatic",
-      "node16-macos",
-      "node16-windows"
-    ]
   }
 }

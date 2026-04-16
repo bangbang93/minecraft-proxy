@@ -1,5 +1,5 @@
-import * as cluster from 'cluster'
-import * as MinecraftData from 'minecraft-data'
+import {isMaster} from './worker-cluster'
+import MinecraftData from 'minecraft-data'
 import {Container, Inject} from 'typedi'
 import {Client} from './client'
 import {ClusterRequest} from './cluster'
@@ -63,7 +63,7 @@ export class Backend implements IBackend {
   }
 
   public async getOnline(curr = false): Promise<number> {
-    if (cluster.isMaster || curr) {
+    if (isMaster || curr) {
       return this.clients.size
     }
 
