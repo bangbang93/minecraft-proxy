@@ -12,6 +12,7 @@ import {ProxyServer} from './proxy-server'
 
 function isSea(): boolean {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const sea = require('node:sea')
     return sea.isSea()
   } catch {

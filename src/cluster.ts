@@ -1,15 +1,14 @@
-import * as Bluebird from 'bluebird'
 import pMap from 'p-map'
 import {sum} from 'lodash'
 import {Container, Inject, Service} from 'typedi'
 import {ProxyServer} from './proxy-server'
 import {
   isWorker,
-  workers,
+  onMessage,
   parentPort,
   sendMessage,
-  onMessage,
   WorkerLike,
+  workers,
 } from './worker-cluster'
 
 const handlers = new Map<number, (...args: unknown[]) => unknown>()

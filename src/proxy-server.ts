@@ -1,5 +1,5 @@
 import * as Logger from 'bunyan'
-import {isWorker, getWorkerId} from './worker-cluster'
+import {getWorkerId, isWorker} from './worker-cluster'
 import {EventEmitter} from 'events'
 import {pick} from 'lodash'
 import {createServer, Server, Socket} from 'net'

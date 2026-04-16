@@ -1,16 +1,16 @@
 import 'reflect-metadata'
 import 'source-map-support/register'
-import { isMainThread, Worker as NodeWorker, threadId } from 'worker_threads'
-import { join } from 'path'
-import { loadConfig } from './config'
-import { masterOnClusterMessage } from './cluster'
-import { createWorkerWrapper, removeWorker, workers } from './worker-cluster'
-import { createLogger } from 'bunyan'
+import {isMainThread, Worker as NodeWorker, threadId} from 'worker_threads'
+import {join} from 'path'
+import {loadConfig} from './config'
+import {masterOnClusterMessage} from './cluster'
+import {createWorkerWrapper, removeWorker, workers} from './worker-cluster'
+import {createLogger} from 'bunyan'
 
 let workerCounter = 0
 
 const Logger = createLogger({
-  name: isMainThread ? 'master' : `worker ${threadId}`
+  name: isMainThread ? 'master' : `worker ${threadId}`,
 })
 
 async function main(): Promise<void> {
@@ -25,9 +25,10 @@ async function main(): Promise<void> {
     Logger.info('all workers started')
   } else {
     setupWorker(threadId)
-    const { bootstrap } = await import('./main')
+    const {bootstrap} = await import('./main')
     bootstrap()
-      .catch((err) => {
+      .catch((err: Error) => {
+        // eslint-disable-next-line no-console
         console.error(err)
         process.exit(1)
       })
@@ -41,7 +42,7 @@ function startWorker(): void {
 
   worker.on('exit', (code) => {
     if (code !== 0) {
-      Logger.warn({ workerId, code }, `worker exited with error code: ${code}`)
+      Logger.warn({workerId, code}, `worker exited with error code: ${code}`)
       removeWorker(workerId)
       startWorker()
     }
@@ -60,7 +61,7 @@ function setupWorker(workerId: number): void {
   })
 }
 
-function setupMaster(config: { proxy: { workers: number } }): void {
+function setupMaster(config: {proxy: {workers: number}}): void {
   process.on('SIGUSR1', async () => {
     Logger.info('got SIGUSR1, reloading')
 
@@ -76,8 +77,9 @@ function setupMaster(config: { proxy: { workers: number } }): void {
   })
 }
 
-main()
-  .catch((err) => {
+void main()
+  .catch((err: Error) => {
+    // eslint-disable-next-line no-console
     console.error(err)
     process.exit(1)
   })
