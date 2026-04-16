@@ -12,9 +12,22 @@ export interface WorkerLike extends EventEmitter {
   disconnect(): void
 }
 
+const WORKER_TERMINATE_TIMEOUT_MS = 5000
+
+export interface WorkerShutdownMessage {
+  type: 'shutdown'
+}
+
+export function isWorkerShutdownMessage(message: unknown): message is WorkerShutdownMessage {
+  return typeof message === 'object'
+    && message !== null
+    && (message as {type?: string}).type === 'shutdown'
+}
+
 class WorkerThreadWrapper extends EventEmitter implements WorkerLike {
   id: number
   private worker: Worker
+  private terminateTimeout?: NodeJS.Timeout
 
   constructor(worker: Worker, id: number) {
     super()
@@ -22,7 +35,13 @@ class WorkerThreadWrapper extends EventEmitter implements WorkerLike {
     this.id = id
     this.worker.on('message', (msg) => this.emit('message', msg))
     this.worker.on('error', (err) => this.emit('error', err))
-    this.worker.on('exit', (code) => this.emit('exit', code))
+    this.worker.on('exit', (code) => {
+      if (this.terminateTimeout) {
+        clearTimeout(this.terminateTimeout)
+        this.terminateTimeout = undefined
+      }
+      this.emit('exit', code)
+    })
     this.worker.on('online', () => this.emit('online'))
   }
 
@@ -32,7 +51,10 @@ class WorkerThreadWrapper extends EventEmitter implements WorkerLike {
   }
 
   disconnect(): void {
-    void this.worker.terminate()
+    this.worker.postMessage({type: 'shutdown'} as WorkerShutdownMessage)
+    this.terminateTimeout = setTimeout(() => {
+      void this.worker.terminate()
+    }, WORKER_TERMINATE_TIMEOUT_MS)
   }
 }
 
