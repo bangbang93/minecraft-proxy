@@ -4,7 +4,7 @@ import {
   IsArray, IsBoolean, IsIn, IsInstance, IsInt, IsOptional, IsString, IsUrl, Max, Min, validate, ValidateIf,
   ValidateNested,
 } from 'class-validator'
-import * as IPCIDR from 'ip-cidr'
+import IPCIDR from 'ip-cidr'
 import {castArray} from 'lodash'
 import {cpus} from 'os'
 import {inspect} from 'util'

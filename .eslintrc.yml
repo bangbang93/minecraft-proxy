@@ -3,3 +3,5 @@ extends:
 parser: '@typescript-eslint/parser'
 parserOptions:
   project: './tsconfig.eslint.json'
+ignorePatterns:
+  - 'scripts/*'

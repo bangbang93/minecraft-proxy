@@ -6,29 +6,97 @@ on:
       - v*
 
 jobs:
-  build:
-
+  build-linux-x64:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [24.x]
-
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm install
-    - run: npm run build
-    - run: tar czf minecraft-proxy.tar.gz bin/ config/ dist/ node_modules/ package.json package-lock.json README.md
-    - run: npm run pkg
-    - uses: "marvinpinto/action-automatic-releases@latest"
-      with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        prerelease: false
-        files: |
-          pkg/**
-          minecraft-proxy.tar.gz
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 25.x
+      - run: npm ci
+      - run: npm run build:sea
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sea-linux-x64
+          path: sea/mcproxy-linux-x64
 
+  build-linux-arm64:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 25.x
+      - run: npm ci
+      - run: npm run build:sea
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sea-linux-arm64
+          path: sea/mcproxy-linux-arm64
+
+  build-darwin-x64:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 25.x
+      - run: npm ci
+      - run: npm run build:sea
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sea-darwin-x64
+          path: sea/mcproxy-darwin-x64
+
+  build-darwin-arm64:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 25.x
+      - run: npm ci
+      - run: npm run build:sea
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sea-darwin-arm64
+          path: sea/mcproxy-darwin-arm64
+
+  build-windows-x64:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 25.x
+      - run: npm ci
+      - run: npm run build:sea
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sea-win-x64
+          path: sea/mcproxy-win-x64.exe
+
+  release:
+    needs: [build-linux-x64, build-linux-arm64, build-darwin-x64, build-darwin-arm64, build-windows-x64]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 25.x
+      - run: npm ci
+      - run: npm run build
+      - run: tar czf minecraft-proxy.tar.gz bin/ config/ dist/ node_modules/ package.json package-lock.json README.md
+      - uses: actions/download-artifact@v4
+        with:
+          path: sea-artifacts
+      - run: |
+          mkdir -p release
+          find sea-artifacts -name "mcproxy*" -exec mv {} release/ \;
+      - uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          prerelease: false
+          files: |
+            release/*
+            minecraft-proxy.tar.gz

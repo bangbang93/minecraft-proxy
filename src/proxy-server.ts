@@ -1,5 +1,5 @@
 import * as Logger from 'bunyan'
-import {isWorker, worker} from 'cluster'
+import {getWorkerId, isWorker} from './worker-cluster'
 import {EventEmitter} from 'events'
 import {pick} from 'lodash'
 import {createServer, Server, Socket} from 'net'
@@ -29,7 +29,7 @@ export class ProxyServer extends EventEmitter {
     super()
     const loggerOptions: Logger.LoggerOptions = {name: 'server', port, host, level: this.config.loglevel}
     if (isWorker) {
-      loggerOptions.worker = worker.id
+      loggerOptions.worker = getWorkerId()
     }
     this.logger = Logger.createLogger(loggerOptions)
   }

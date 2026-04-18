@@ -1,32 +1,35 @@
 #!/usr/bin/env node
 require('reflect-metadata')
 require('source-map-support/register')
-const cluster = require('cluster')
-const {loadConfig} = require('../dist/config')
-const {masterOnClusterMessage} = require('../dist/cluster')
-const {createLogger} = require('bunyan')
-const {join} = require('path')
 
-const workers = new Map()
+const { isMainThread, Worker, threadId } = require('worker_threads')
+const { join } = require('path')
+const { loadConfig } = require('../dist/config')
+const { masterOnClusterMessage } = require('../dist/cluster')
+const { createWorkerWrapper, removeWorker } = require('../dist/worker-cluster')
+const { createLogger } = require('bunyan')
 
-const Logger = createLogger({name: cluster.isMaster ? 'master' : `worker ${cluster.worker.id}`})
+let workerCounter = 0
+
+const Logger = createLogger({
+  name: isMainThread ? 'master' : `worker ${threadId}`
+})
 
 async function main() {
   const config = await loadConfig(join(process.cwd(), 'config/config.yml'))
 
-  if (cluster.isMaster) {
+  if (isMainThread) {
     process.title = 'mc-proxy: master process'
-    for(let i = 0; i < config.proxy.workers; i++) {
+    for (let i = 0; i < config.proxy.workers; i++) {
       startWorker()
     }
     setupMaster(config)
     Logger.info('all workers started')
   } else {
-    setupWorker(cluster.worker.id)
-    const {bootstrap} = require('../dist/main')
+    setupWorker(threadId)
+    const { bootstrap } = require('../dist/main')
     bootstrap()
       .catch((err) => {
-        // eslint-disable-next-line no-console
         console.error(err)
         process.exit(1)
       })
@@ -34,18 +37,21 @@ async function main() {
 }
 
 function startWorker() {
-  const worker = cluster.fork()
-  workers.set(worker.id, worker)
-  worker.on('exit', (code, signal) => {
-    if (signal) {
-      Logger.warn({workerId: worker.id, signal}, `worker was killed by signal: ${signal}`)
-      startWorker()
-    } else if (code !== 0) {
-      Logger.warn({workerId: worker.id, code}, `worker exited with error code: ${code}`)
+  const workerId = ++workerCounter
+  const worker = new Worker(__filename)
+  const wrapper = createWorkerWrapper(worker, workerId)
+
+  worker.on('exit', (code) => {
+    if (code !== 0) {
+      Logger.warn({ workerId, code }, `worker exited with error code: ${code}`)
+      removeWorker(workerId)
       startWorker()
     }
   })
-  worker.on('message', (data) => masterOnClusterMessage(worker, data))
+
+  wrapper.on('message', (data) => {
+    masterOnClusterMessage(wrapper, data)
+  })
 }
 
 function setupWorker(workerId) {
@@ -56,16 +62,17 @@ function setupWorker(workerId) {
   })
 }
 
-function setupMaster() {
+function setupMaster(config) {
   process.on('SIGUSR1', async () => {
-    const config = await loadConfig()
-    Logger.info('got sighup, reloading')
-    for (const worker of workers.values()) {
-      worker.disconnect()
-    }
-    workers.clear()
+    Logger.info('got SIGUSR1, reloading')
 
-    for(let i = 0; i< config.proxy.workers; i++) {
+    for (const [id, worker] of require('../dist/worker-cluster').workers) {
+      worker.disconnect()
+      removeWorker(id)
+    }
+    workerCounter = 0
+
+    for (let i = 0; i < config.proxy.workers; i++) {
       startWorker()
     }
   })

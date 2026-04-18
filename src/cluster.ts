@@ -1,9 +1,15 @@
-import * as Bluebird from 'bluebird'
-import {isWorker, worker, Worker, workers} from 'cluster'
+import pMap from 'p-map'
 import {sum} from 'lodash'
-import * as pMap from 'p-map'
 import {Container, Inject, Service} from 'typedi'
 import {ProxyServer} from './proxy-server'
+import {
+  isWorker,
+  onMessage,
+  parentPort,
+  sendMessage,
+  WorkerLike,
+  workers,
+} from './worker-cluster'
 
 const handlers = new Map<number, (...args: unknown[]) => unknown>()
 
@@ -32,7 +38,7 @@ export class ClusterRequest implements IClusterRpc {
   public async getOnline(name: string): Promise<number> {
     return new Promise<number>((resolve) => {
       const correlationId = Math.random()
-      process.send({
+      sendMessage({
         type: 'rpc-request',
         service: 'backend',
         method: 'getOnline',
@@ -47,7 +53,7 @@ export class ClusterRequest implements IClusterRpc {
 @Service()
 export class ClusterProxy implements IClusterRpc {
   public async getOnline(name: string): Promise<number> {
-    const data = await pMap(Object.values(workers), async (worker) => {
+    const data = await pMap(Array.from(workers.values()), async (worker) => {
       const correlationId = Math.random()
       worker.send({
         type: 'rpc-request',
@@ -73,7 +79,7 @@ export class ClusterHandler implements IClusterRpc {
   }
 }
 
-export async function masterOnClusterMessage(worker: Worker, data: IRpcData) {
+export async function masterOnClusterMessage(worker: WorkerLike, data: IRpcData) {
   switch (data.type) {
     case 'rpc-request': {
       const clusterProxy = Container.get(ClusterProxy)
@@ -96,8 +102,8 @@ export async function masterOnClusterMessage(worker: Worker, data: IRpcData) {
   }
 }
 
-if (isWorker) {
-  worker.on('message', async (data: IRpcData) => {
+if (isWorker && parentPort) {
+  onMessage(async (data: IRpcData) => {
     switch (data.type) {
       case 'rpc-request': {
         const clusterHandler = Container.get(ClusterHandler)
@@ -107,7 +113,7 @@ if (isWorker) {
           correlationId: data.correlationId,
           data: resp,
         }
-        worker.send(rpcResponse)
+        sendMessage(rpcResponse)
         break
       }
       case 'rpc-response': {

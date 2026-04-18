@@ -3,7 +3,8 @@
   "include": [
     "src/**/*",
     "bin/*",
-    "test/*"
+    "test/*",
+    "scripts/*"
   ],
   "exclude": ["node_modules"]
 }
