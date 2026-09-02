@@ -5,6 +5,9 @@
   "exports": "./dist/index.js",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
+  "engines": {
+    "node": ">=22"
+  },
   "bin": "bin/mcproxy",
   "scripts": {
     "build": "tsc",
