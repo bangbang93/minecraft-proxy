@@ -83,3 +83,4 @@ plugins/
 dist/
 pkg/
 sea/
+.omo/
