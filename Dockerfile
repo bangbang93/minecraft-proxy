@@ -3,7 +3,7 @@ RUN apt-get update && \
   apt-get install python3 && \
   corepack enable
 WORKDIR /opt/minecraft-proxy
-COPY package.json pnpm-lock.yaml tsconfig.json ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.json ./
 RUN pnpm install --frozen-lockfile
 COPY src ./src
 RUN pnpm run build
