@@ -5,6 +5,9 @@
   "exports": "./dist/index.js",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
+  "engines": {
+    "node": ">=22"
+  },
   "bin": "bin/mcproxy",
   "scripts": {
     "build": "tsc",
@@ -66,6 +69,6 @@
     "tapable": "^2.2.1",
     "typedi": "^0.8.0",
     "verror": "^1.10.1",
-    "yaml-import": "^2.0.0"
+    "yaml-import": "^3.0.0"
   }
 }

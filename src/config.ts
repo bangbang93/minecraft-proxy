@@ -67,7 +67,7 @@ export class Config {
 }
 
 export async function loadConfig(path: string): Promise<Config> {
-  const data = yimp.read(path, {safe: false})
+  const data = yimp.read(path)
   const config = plainToClass(Config, data, {enableImplicitConversion: true})
   const errors = await validate(config)
   if (errors.length === 0) return config
