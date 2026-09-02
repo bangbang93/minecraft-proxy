@@ -4,7 +4,7 @@ import {
   IsArray, IsBoolean, IsIn, IsInstance, IsInt, IsOptional, IsString, IsUrl, Max, Min, validate, ValidateIf,
   ValidateNested,
 } from 'class-validator'
-import IPCIDR from 'ip-cidr'
+import {Cidr} from './cidr'
 import {castArray} from 'lodash'
 import {cpus} from 'os'
 import {inspect} from 'util'
@@ -38,8 +38,8 @@ class ConfigServer {
 }
 
 class BlockList {
-  @IsInstance(IPCIDR, {each: true}) @Transform((v: string[]) => v.map((e) => new IPCIDR(e)))
-  public ips: IPCIDR[] = []
+  @IsInstance(Cidr, {each: true}) @Transform((v: string[]) => v.map((e) => new Cidr(e)))
+  public ips: Cidr[] = []
 
   @IsString({each: true})
   public usernames: string[] = []

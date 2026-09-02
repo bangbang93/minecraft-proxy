@@ -58,7 +58,7 @@
     "eventemitter2": "^6.4.4",
     "globby": "^11.0.3",
     "got": "^11.8.5",
-    "ip-cidr": "^2.0.6",
+    "ip-num": "1.6.2",
     "lodash": "^4.17.15",
     "minecraft-data": "^3.33.0",
     "minecraft-protocol": "^1.43.1",
