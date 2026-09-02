@@ -10,11 +10,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 25.x
-      - run: npm ci
-      - run: npm run build:sea
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:sea
       - uses: actions/upload-artifact@v4
         with:
           name: sea-linux-x64
@@ -24,11 +26,13 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 25.x
-      - run: npm ci
-      - run: npm run build:sea
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:sea
       - uses: actions/upload-artifact@v4
         with:
           name: sea-linux-arm64
@@ -38,11 +42,13 @@ jobs:
     runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 25.x
-      - run: npm ci
-      - run: npm run build:sea
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:sea
       - uses: actions/upload-artifact@v4
         with:
           name: sea-darwin-x64
@@ -52,11 +58,13 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 25.x
-      - run: npm ci
-      - run: npm run build:sea
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:sea
       - uses: actions/upload-artifact@v4
         with:
           name: sea-darwin-arm64
@@ -66,11 +74,13 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 25.x
-      - run: npm ci
-      - run: npm run build:sea
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:sea
       - uses: actions/upload-artifact@v4
         with:
           name: sea-win-x64
@@ -81,12 +91,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 25.x
-      - run: npm ci
-      - run: npm run build
-      - run: tar czf minecraft-proxy.tar.gz bin/ config/ dist/ node_modules/ package.json package-lock.json README.md
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build
+      - run: tar czf minecraft-proxy.tar.gz bin/ config/ dist/ node_modules/ package.json pnpm-lock.yaml README.md
       - uses: actions/download-artifact@v4
         with:
           path: sea-artifacts

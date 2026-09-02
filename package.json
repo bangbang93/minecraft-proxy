@@ -5,6 +5,7 @@
   "exports": "./dist/index.js",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
+  "packageManager": "pnpm@11.24.0",
   "engines": {
     "node": ">=22"
   },
@@ -14,7 +15,7 @@
     "build:sea": "node scripts/build-sea.js",
     "test": "true",
     "dev": "ts-node src/main.ts",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "pnpm run build",
     "lint": "eslint --ext .js,.ts ."
   },
   "repository": {
